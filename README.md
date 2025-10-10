@@ -102,4 +102,3 @@ CIRCULAR GLOBAL LEDGERS, INC. - USA
 
 - Original JS Version: Gianluca De Novi, PhD
 - Go Implementation: Danny De Novi
-- C# Implementation: Generated with [Claude Code](https://claude.ai/code)
