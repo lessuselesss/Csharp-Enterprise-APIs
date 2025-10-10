@@ -30,51 +30,44 @@ dotnet add package CircularEnterpriseApis
 
 ## Usage Example
 
-See `examples/` for a basic example of how to use the API to submit a certificate. You can run it with:
+See `examples/Program.cs` for a basic example of how to use the API to submit a certificate. You can run it with:
 
 ```bash
-cd examples
-dotnet run
+dotnet run --project examples
 ```
 
-A more detailed example can be found in `src/CircularEnterpriseApis.Examples/`.
+A more detailed example can be found in `examples/SimpleCertificateSubmission.cs`.
 
 ## API Documentation
-
-### Package-Level Functions
-
-Main functions for creating and managing Circular Protocol resources:
-
-- `CircularEnterpriseApis.NewCEPAccount()` - Factory function to create a new `CEPAccount` instance.
-- `CircularEnterpriseApis.NewCCertificate()` - Factory function to create a new `CCertificate` instance.
-- `CircularEnterpriseApis.GetNAG(network)` - Discovers the Network Access Gateway for a given network.
 
 ### CEPAccount Class
 
 Main class for interacting with the Circular blockchain:
 
-- `Open(address)` - Initializes the account with a specified blockchain address.
+- `NewCEPAccount() CEPAccount` - Factory function to create a new `CEPAccount` instance.
+- `Open(string address) bool` - Initializes the account with a specified blockchain address.
 - `Close()` - Clears all sensitive and operational data from the account.
-- `SetNetwork(network)` - Configures the account to operate on a specific blockchain network.
-- `SetBlockchain(chain)` - Explicitly sets the blockchain identifier for the account.
-- `UpdateAccount()` - Fetches the latest nonce for the account from the NAG.
-- `SubmitCertificate(pdata, privateKeyHex)` - Creates, signs, and submits a data certificate to the blockchain.
-- `GetTransaction(blockID, transactionID)` - Retrieves transaction details by block and transaction ID.
-- `GetTransactionOutcome(txID, timeoutSec, intervalSec)` - Polls for the final status of a transaction.
-- `GetLastError()` - Retrieves the last error message.
+- `SetNetwork(string network) string` - Configures the account to operate on a specific blockchain network.
+- `SetBlockchain(string chain)` - Explicitly sets the blockchain identifier for the account.
+- `UpdateAccount() bool` - Fetches the latest nonce for the account from the NAG.
+- `SubmitCertificate(string pdata, string privateKeyHex)` - Creates, signs, and submits a data certificate to the blockchain.
+- `GetTransaction(string blockID, string transactionID) Dictionary<string, object>` - Retrieves transaction details by block and transaction ID.
+- `GetTransactionOutcome(string txID, int timeoutSec, int intervalSec) Dictionary<string, object>` - Polls for the final status of a transaction.
+- `GetLastError() string` - Retrieves the last error message.
 
 ### CCertificate Class
 
 Class for managing certificates:
 
-- `SetData(data)` - Sets the primary data content of the certificate.
-- `GetData()` - Retrieves the primary data content from the certificate.
-- `GetJSONCertificate()` - Serializes the certificate object into a JSON string.
-- `GetCertificateSize()` - Calculates the size of the JSON-serialized certificate in bytes.
-- `SetPreviousTxID(txID)` - Sets the transaction ID of the preceding certificate.
-- `SetPreviousBlock(block)` - Sets the block identifier of the preceding certificate.
-- `GetPreviousTxID()` - Retrieves the transaction ID of the preceding certificate.
-- `GetPreviousBlock()` - Retrieves the block identifier of the preceding certificate.
+- `NewCCertificate() CCertificate` - Factory function to create a new `CCertificate` instance.
+- `SetData(string data)` - Sets the primary data content of the certificate.
+- `GetData() string` - Retrieves the primary data content from the certificate.
+- `GetJSONCertificate() string` - Serializes the certificate object into a JSON string.
+- `GetCertificateSize() int` - Calculates the size of the JSON-serialized certificate in bytes.
+- `SetPreviousTxID(string txID)` - Sets the transaction ID of the preceding certificate.
+- `SetPreviousBlock(string block)` - Sets the block identifier of the preceding certificate.
+- `GetPreviousTxID() string` - Retrieves the transaction ID of the preceding certificate.
+- `GetPreviousBlock() string` - Retrieves the block identifier of the preceding certificate.
 
 ## Testing
 
