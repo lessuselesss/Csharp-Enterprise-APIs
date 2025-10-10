@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>CircularEnterpriseApis</PackageId>
+    <PackageVersion>1.0.13</PackageVersion>
+    <Description>C# implementation of Circular Protocol Enterprise APIs</Description>
+    <Authors>Circular Labs</Authors>
+    <Company>Circular Labs</Company>
+    <Product>Circular Enterprise APIs</Product>
+    <Copyright>Copyright (c) 2024 Circular Labs</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+  </ItemGroup>
+
+</Project>
