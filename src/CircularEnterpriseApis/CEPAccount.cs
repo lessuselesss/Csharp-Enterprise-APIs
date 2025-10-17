@@ -63,33 +63,24 @@ namespace CircularEnterpriseApis
 
         #endregion
 
-        #region Factory Method - exact same as Go
+        #region Constructor
 
         /// <summary>
-        /// Factory function that creates and initializes a new CEPAccount instance
-        /// Maps to Go: func NewCEPAccount() *CEPAccount
+        /// Creates a new CEPAccount instance
+        /// Matches Node.js/PHP/Java: new CEPAccount()
         /// </summary>
-        public static CEPAccount NewCEPAccount()
+        public CEPAccount()
         {
-            return new CEPAccount();
+            // Initialize with default values (already set by property initializers)
         }
 
         #endregion
 
-        #region Public Methods - exact same signatures as Go
-
-        /// <summary>
-        /// Retrieves the last error message
-        /// Maps to Go: func (a *CEPAccount) GetLastError() string
-        /// </summary>
-        public string GetLastError()
-        {
-            return LastError;
-        }
+        #region Public Methods
 
         /// <summary>
         /// Initializes the CEPAccount with a specified blockchain address
-        /// Maps to Go: func (a *CEPAccount) Open(address string) bool
+        /// Matches Node.js/PHP/Java: open(address)
         /// </summary>
         public bool Open(string address)
         {
@@ -146,7 +137,7 @@ namespace CircularEnterpriseApis
 
         /// <summary>
         /// Explicitly sets the blockchain identifier
-        /// Maps to Go: func (a *CEPAccount) SetBlockchain(chain string)
+        /// Matches Node.js/PHP/Java: setBlockchain(chain)
         /// </summary>
         public void SetBlockchain(string chain)
         {
@@ -154,8 +145,41 @@ namespace CircularEnterpriseApis
         }
 
         /// <summary>
+        /// Signs data using the provided private key
+        /// Matches Node.js/Java: signData(data, privateKey)
+        /// </summary>
+        /// <param name="data">Data to sign</param>
+        /// <param name="privateKeyHex">Private key in hex format</param>
+        /// <returns>Signature in hex format, or empty string on error</returns>
+        public string SignData(string data, string privateKeyHex)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(data))
+                {
+                    LastError = "Data cannot be empty";
+                    return "";
+                }
+
+                if (string.IsNullOrEmpty(privateKeyHex))
+                {
+                    LastError = "Private key cannot be empty";
+                    return "";
+                }
+
+                LastError = "";
+                return CryptoUtils.SignMessage(privateKeyHex, data);
+            }
+            catch (Exception ex)
+            {
+                LastError = $"SignData failed: {ex.Message}";
+                return "";
+            }
+        }
+
+        /// <summary>
         /// Updates account information by retrieving the current nonce
-        /// Maps to Go: func (a *CEPAccount) UpdateAccount() bool
+        /// Matches Node.js/PHP/Java: updateAccount()
         /// </summary>
         public bool UpdateAccount()
         {

@@ -3,34 +3,12 @@ using System;
 namespace CircularEnterpriseApis
 {
     /// <summary>
-    /// Package-level factory functions that exactly match Go implementation
-    /// Enables identical IntelliSense discovery patterns:
-    /// Go: circular_enterprise_apis.NewCEPAccount()
-    /// C#: CircularEnterpriseApis.NewCEPAccount()
+    /// Package-level utility functions and constants
+    /// Provides access to common utilities for blockchain operations
     /// </summary>
     public static class CircularEnterpriseApis
     {
-        /// <summary>
-        /// Creates a new CEPAccount instance - matches Go package-level function exactly
-        /// Maps to Go: func NewCEPAccount() *CEPAccount
-        /// Usage: var account = CircularEnterpriseApis.NewCEPAccount();
-        /// </summary>
-        public static CEPAccount NewCEPAccount()
-        {
-            return CEPAccount.NewCEPAccount();
-        }
-
-        /// <summary>
-        /// Creates a new CCertificate instance - matches Go package-level function exactly
-        /// Maps to Go: func NewCCertificate() *CCertificate
-        /// Usage: var cert = CircularEnterpriseApis.NewCCertificate();
-        /// </summary>
-        public static CCertificate NewCCertificate()
-        {
-            return CCertificate.NewCCertificate();
-        }
-
-        // Re-expose constants at package level to match Go exactly
+        // Package-level constants
         // Go: circular_enterprise_apis.LibVersion
         // C#: CircularEnterpriseApis.LibVersion
         public const string LibVersion = Constants.LibVersion;

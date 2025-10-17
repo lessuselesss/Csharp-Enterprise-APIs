@@ -37,7 +37,7 @@ namespace CircularEnterpriseApis.IntegrationTests
                 return;
             }
 
-            var acc = CEPAccount.NewCEPAccount();
+            var acc = new CEPAccount();
 
             // Open account first like example
             bool opened = acc.Open(address);
@@ -45,7 +45,7 @@ namespace CircularEnterpriseApis.IntegrationTests
 
             // Set network to testnet like Go test
             string nagUrl = acc.SetNetwork("testnet");
-            nagUrl.Should().NotBeEmpty($"acc.SetNetwork() failed: {acc.GetLastError()}");
+            nagUrl.Should().NotBeEmpty($"acc.SetNetwork() failed: {acc.LastError}");
 
             // Set default blockchain like Go test
             acc.SetBlockchain("8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2");
@@ -58,7 +58,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             bool updated = acc.UpdateAccount();
             if (!updated)
             {
-                Console.WriteLine($"Account update failed: {acc.GetLastError()}, proceeding anyway...");
+                Console.WriteLine($"Account update failed: {acc.LastError}, proceeding anyway...");
             }
             else
             {
@@ -69,9 +69,9 @@ namespace CircularEnterpriseApis.IntegrationTests
             acc.SubmitCertificate("test message", privateKeyHex);
 
             // Log submission result like the example does
-            if (!string.IsNullOrEmpty(acc.GetLastError()))
+            if (!string.IsNullOrEmpty(acc.LastError))
             {
-                Console.WriteLine($"Certificate submission failed: {acc.GetLastError()}");
+                Console.WriteLine($"Certificate submission failed: {acc.LastError}");
             }
             else
             {
@@ -92,7 +92,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             }
             else
             {
-                Console.WriteLine($"Transaction polling timeout or error: {acc.GetLastError()}");
+                Console.WriteLine($"Transaction polling timeout or error: {acc.LastError}");
                 Console.WriteLine($"Transaction ID for manual verification: {txHash}");
             }
         }
@@ -108,7 +108,7 @@ namespace CircularEnterpriseApis.IntegrationTests
                 return;
             }
 
-            var acc = CEPAccount.NewCEPAccount();
+            var acc = new CEPAccount();
             acc.SetNetwork("testnet");
             acc.SetBlockchain("8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2");
 
@@ -119,12 +119,12 @@ namespace CircularEnterpriseApis.IntegrationTests
             Console.WriteLine($"Blockchain: {acc.Blockchain}");
 
             bool updated = acc.UpdateAccount();
-            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.GetLastError()}");
+            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.LastError}");
 
             // Submit certificate with test data
             string certificateData = "test data";
             acc.SubmitCertificate(certificateData, privateKeyHex);
-            acc.GetLastError().Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.GetLastError()}");
+            acc.LastError.Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.LastError}");
 
             string txHash = acc.LatestTxID;
             txHash.Should().NotBeEmpty("txHash not found in response");
@@ -139,7 +139,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             }
             else
             {
-                Console.WriteLine($"Certificate transaction timeout: {acc.GetLastError()}");
+                Console.WriteLine($"Certificate transaction timeout: {acc.LastError}");
                 Console.WriteLine($"Transaction ID: {txHash}");
             }
         }
@@ -155,7 +155,7 @@ namespace CircularEnterpriseApis.IntegrationTests
                 return;
             }
 
-            var acc = CEPAccount.NewCEPAccount();
+            var acc = new CEPAccount();
             acc.SetNetwork("testnet");
             acc.SetBlockchain("8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2");
 
@@ -166,7 +166,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             Console.WriteLine($"Blockchain: {acc.Blockchain}");
 
             bool updated = acc.UpdateAccount();
-            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.GetLastError()}");
+            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.LastError}");
 
             // Create certificate with timestamp like Go test
             string message = "Hello World";
@@ -174,7 +174,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             string certificateData = $"{{\"message\":\"{message}\",\"timestamp\":{timestamp}}}";
 
             acc.SubmitCertificate(certificateData, privateKeyHex);
-            acc.GetLastError().Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.GetLastError()}");
+            acc.LastError.Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.LastError}");
 
             string txHash = acc.LatestTxID;
             txHash.Should().NotBeEmpty("txHash not found in response");
@@ -195,7 +195,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             }
             else
             {
-                Console.WriteLine($"Hello World transaction timeout: {acc.GetLastError()}");
+                Console.WriteLine($"Hello World transaction timeout: {acc.LastError}");
                 Console.WriteLine($"Transaction ID: {txHash}");
             }
         }
@@ -211,7 +211,7 @@ namespace CircularEnterpriseApis.IntegrationTests
                 return;
             }
 
-            var acc = CEPAccount.NewCEPAccount();
+            var acc = new CEPAccount();
             acc.SetNetwork("testnet");
             acc.SetBlockchain("8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2");
 
@@ -219,11 +219,11 @@ namespace CircularEnterpriseApis.IntegrationTests
             opened.Should().BeTrue($"acc.Open() failed: {acc.LastError}");
 
             bool updated = acc.UpdateAccount();
-            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.GetLastError()}");
+            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.LastError}");
 
             // Submit certificate with JSON data like Go E2E test
             acc.SubmitCertificate("{\"test\":\"data\"}", privateKeyHex);
-            acc.GetLastError().Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.GetLastError()}");
+            acc.LastError.Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.LastError}");
 
             string txHash = acc.LatestTxID;
             txHash.Should().NotBeEmpty("txHash not found in response");
@@ -240,7 +240,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             }
             else
             {
-                Console.WriteLine($"JSON certificate timeout: {acc.GetLastError()}");
+                Console.WriteLine($"JSON certificate timeout: {acc.LastError}");
                 Console.WriteLine($"Transaction ID: {txHash}");
             }
         }
@@ -256,7 +256,7 @@ namespace CircularEnterpriseApis.IntegrationTests
                 return;
             }
 
-            var acc = CEPAccount.NewCEPAccount();
+            var acc = new CEPAccount();
             acc.SetNetwork("testnet");
             acc.SetBlockchain("8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2");
 
@@ -264,7 +264,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             opened.Should().BeTrue($"acc.Open() failed: {acc.LastError}");
 
             bool updated = acc.UpdateAccount();
-            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.GetLastError()}");
+            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.LastError}");
 
             Console.WriteLine($"Starting certificate chain with nonce: {acc.Nonce}");
 
@@ -273,20 +273,20 @@ namespace CircularEnterpriseApis.IntegrationTests
 
             for (int i = 0; i < 3; i++)
             {
-                var cert = CCertificate.NewCCertificate();
+                var cert = new CCertificate();
                 cert.SetData($"Chain certificate #{i + 1} from C# - {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}");
 
                 if (i > 0)
                 {
                     // Link to previous transaction
-                    cert.SetPreviousTxID(txHashes[i - 1]);
+                    cert.PreviousTxID = txHashes[i - 1]);
                 }
 
                 string certJson = cert.GetJSONCertificate();
                 Console.WriteLine($"Submitting certificate {i + 1}: {certJson}");
 
                 acc.SubmitCertificate(certJson, privateKeyHex);
-                acc.GetLastError().Should().BeEmpty($"Certificate {i + 1} submission failed: {acc.GetLastError()}");
+                acc.LastError.Should().BeEmpty($"Certificate {i + 1} submission failed: {acc.LastError}");
 
                 txHashes[i] = acc.LatestTxID;
                 txHashes[i].Should().NotBeEmpty($"Transaction hash {i + 1} not generated");
@@ -312,7 +312,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             }
             else
             {
-                Console.WriteLine($"Final certificate timeout: {acc.GetLastError()}");
+                Console.WriteLine($"Final certificate timeout: {acc.LastError}");
             }
         }
     }

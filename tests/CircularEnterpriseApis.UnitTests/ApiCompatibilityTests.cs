@@ -72,7 +72,7 @@ namespace CircularEnterpriseApis.UnitTests
         public void CEPAccount_NewCEPAccount_FactoryMethod()
         {
             // Go reference: account := circular_enterprise_apis.NewCEPAccount()
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
 
             Assert.NotNull(account);
             Assert.Equal(Constants.LibVersion, account.CodeVersion);
@@ -85,7 +85,7 @@ namespace CircularEnterpriseApis.UnitTests
         public void CEPAccount_Open_ValidatesAddress()
         {
             // Go reference: account.Open("") -> false, sets LastError
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
 
             bool result = account.Open("");
             Assert.False(result);
@@ -96,7 +96,7 @@ namespace CircularEnterpriseApis.UnitTests
         public void CEPAccount_Close_ClearsAllData()
         {
             // Go reference: account.Close() clears all fields
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
             account.Address = "test";
             account.PublicKey = "test";
             account.LatestTxID = "test";
@@ -114,7 +114,7 @@ namespace CircularEnterpriseApis.UnitTests
         public void CCertificate_NewCCertificate_FactoryMethod()
         {
             // Go reference: cert := circular_enterprise_apis.NewCCertificate()
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
 
             Assert.NotNull(cert);
             Assert.Equal("", cert.Data);
@@ -127,7 +127,7 @@ namespace CircularEnterpriseApis.UnitTests
         public void CCertificate_SetData_ConvertsToHex()
         {
             // Go reference: cert.SetData("test") sets Data to hex
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
             cert.SetData("test");
 
             Assert.Equal("74657374", cert.Data); // "test" in uppercase hex
@@ -137,7 +137,7 @@ namespace CircularEnterpriseApis.UnitTests
         public void CCertificate_GetData_ConvertsFromHex()
         {
             // Go reference: cert.GetData() converts hex back to string
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
             cert.Data = "74657374"; // "test" in hex
 
             string result = cert.GetData();
@@ -148,10 +148,10 @@ namespace CircularEnterpriseApis.UnitTests
         public void CCertificate_GetJSONCertificate_ProducesValidJson()
         {
             // Go reference: cert.GetJSONCertificate() returns JSON string
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
             cert.SetData("test");
-            cert.SetPreviousTxID("0x123");
-            cert.SetPreviousBlock("0x456");
+            cert.PreviousTxID = "0x123");
+            cert.PreviousBlock = "0x456");
 
             string json = cert.GetJSONCertificate();
 
@@ -165,7 +165,7 @@ namespace CircularEnterpriseApis.UnitTests
         public void CCertificate_GetCertificateSize_ReturnsJsonByteLength()
         {
             // Go reference: cert.GetCertificateSize() returns byte length
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
             cert.SetData("test");
 
             int size = cert.GetCertificateSize();
@@ -182,7 +182,7 @@ namespace CircularEnterpriseApis.UnitTests
         public void CEPAccount_SetNetwork_HandlesValidNetworks(string network)
         {
             // Go reference: account.SetNetwork("testnet") sets NetworkNode
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
 
             string initialNAGURL = account.NAGURL;
 
@@ -201,7 +201,7 @@ namespace CircularEnterpriseApis.UnitTests
         public void CEPAccount_GetTransaction_ValidatesParameters()
         {
             // Go reference: account.GetTransaction("", "txid") -> error
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
 
             var result = account.GetTransaction("", "txid");
             Assert.Null(result);
@@ -228,7 +228,7 @@ namespace CircularEnterpriseApis.UnitTests
         public void ErrorHandling_MatchesGoSemantics()
         {
             // Go returns errors explicitly, C# should set LastError consistently
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
 
             // Test empty network (should set LastError)
             try

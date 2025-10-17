@@ -13,7 +13,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void NewCEPAccount_ReturnsValidInstance()
         {
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
 
             account.Should().NotBeNull();
             account.Address.Should().Be("");
@@ -33,7 +33,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void Open_ValidAddress_ReturnsTrue()
         {
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
             string testAddress = "0x1234567890abcdef";
 
             bool result = account.Open(testAddress);
@@ -46,7 +46,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void Open_EmptyAddress_ReturnsFalse()
         {
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
 
             bool result = account.Open("");
 
@@ -57,7 +57,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void Close_ClearsAllData()
         {
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
             account.Open("0x1234567890abcdef");
             account.PublicKey = "pubkey123";
             account.Info = new { test = "data" };
@@ -77,7 +77,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void SetNetwork_ValidNetwork_ReturnsNAGURL()
         {
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
 
             string result = account.SetNetwork("testnet");
 
@@ -91,7 +91,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void SetNetwork_EmptyNetwork_SetsError()
         {
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
 
             string result = account.SetNetwork("");
 
@@ -102,7 +102,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void SetBlockchain_ValidChain_SetsCorrectly()
         {
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
             string testChain = "0xABCDEF1234567890";
 
             account.SetBlockchain(testChain);
@@ -113,7 +113,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void SetBlockchain_EmptyChain_SetsEmpty()
         {
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
 
             account.SetBlockchain("");
 
@@ -123,10 +123,10 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void GetLastError_ReturnsCurrentError()
         {
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
             account.Open(""); // This should set an error
 
-            string error = account.GetLastError();
+            string error = account.LastError;
 
             error.Should().NotBeEmpty();
             error.Should().Be(account.LastError);
@@ -135,7 +135,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void UpdateAccount_NoAddress_ReturnsFalse()
         {
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
 
             bool result = account.UpdateAccount();
 
@@ -146,7 +146,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void SubmitCertificate_EmptyData_SetsError()
         {
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
             account.Open("0x1234567890abcdef");
 
             account.SubmitCertificate("", "privatekey123");
@@ -157,7 +157,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void SubmitCertificate_EmptyPrivateKey_SetsError()
         {
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
             account.Open("0x1234567890abcdef");
 
             account.SubmitCertificate("test data", "");
@@ -168,7 +168,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void Properties_CanBeSetAndRetrieved()
         {
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
 
             // Test all properties can be set and retrieved
             account.Address = "test_address";
@@ -201,7 +201,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void GetTransaction_NullParameters_ReturnsNull()
         {
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
 
             var result = account.GetTransaction("", "");
 
@@ -212,7 +212,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void GetTransactionOutcome_EmptyTxID_ReturnsNull()
         {
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
 
             var result = account.GetTransactionOutcome("", 30, 5);
 

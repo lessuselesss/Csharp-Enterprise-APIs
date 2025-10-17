@@ -44,30 +44,33 @@ A more detailed example can be found in `examples/SimpleCertificateSubmission.cs
 
 Main class for interacting with the Circular blockchain:
 
-- `NewCEPAccount() CEPAccount` - Factory function to create a new `CEPAccount` instance.
-- `Open(string address) bool` - Initializes the account with a specified blockchain address.
-- `Close()` - Clears all sensitive and operational data from the account.
-- `SetNetwork(string network) string` - Configures the account to operate on a specific blockchain network.
-- `SetBlockchain(string chain)` - Explicitly sets the blockchain identifier for the account.
-- `UpdateAccount() bool` - Fetches the latest nonce for the account from the NAG.
-- `SubmitCertificate(string pdata, string privateKeyHex)` - Creates, signs, and submits a data certificate to the blockchain.
-- `GetTransaction(string blockID, string transactionID) Dictionary<string, object>` - Retrieves transaction details by block and transaction ID.
-- `GetTransactionOutcome(string txID, int timeoutSec, int intervalSec) Dictionary<string, object>` - Polls for the final status of a transaction.
-- `GetLastError() string` - Retrieves the last error message.
+- `new CEPAccount()` - Creates a new CEPAccount instance
+- `Open(string address) bool` - Initializes the account with a specified blockchain address
+- `Close()` - Clears all sensitive and operational data from the account
+- `SetNetwork(string network) string` - Configures the account to operate on a specific blockchain network
+- `SetBlockchain(string chain)` - Explicitly sets the blockchain identifier for the account
+- `UpdateAccount() bool` - Fetches the latest nonce for the account from the NAG
+- `SignData(string data, string privateKeyHex) string` - Signs data using the provided private key
+- `SubmitCertificate(string pdata, string privateKeyHex)` - Creates, signs, and submits a data certificate to the blockchain
+- `GetTransaction(string blockID, string transactionID) Dictionary<string, object>` - Retrieves transaction details by block and transaction ID
+- `GetTransactionOutcome(string txID, int timeoutSec, int intervalSec) Dictionary<string, object>` - Polls for the final status of a transaction
+
+**Properties:**
+- `LastError` - Last error message (access directly instead of using GetLastError())
 
 ### CCertificate Class
 
 Class for managing certificates:
 
-- `NewCCertificate() CCertificate` - Factory function to create a new `CCertificate` instance.
-- `SetData(string data)` - Sets the primary data content of the certificate.
-- `GetData() string` - Retrieves the primary data content from the certificate.
-- `GetJSONCertificate() string` - Serializes the certificate object into a JSON string.
-- `GetCertificateSize() int` - Calculates the size of the JSON-serialized certificate in bytes.
-- `SetPreviousTxID(string txID)` - Sets the transaction ID of the preceding certificate.
-- `SetPreviousBlock(string block)` - Sets the block identifier of the preceding certificate.
-- `GetPreviousTxID() string` - Retrieves the transaction ID of the preceding certificate.
-- `GetPreviousBlock() string` - Retrieves the block identifier of the preceding certificate.
+- `new CCertificate()` - Creates a new CCertificate instance
+- `SetData(string data)` - Sets the primary data content of the certificate
+- `GetData() string` - Retrieves the primary data content from the certificate
+- `GetJSONCertificate() string` - Serializes the certificate object into a JSON string
+- `GetCertificateSize() int` - Calculates the size of the JSON-serialized certificate in bytes
+
+**Properties:**
+- `PreviousTxID` - Previous transaction ID (for certificate chaining)
+- `PreviousBlock` - Previous block identifier (for certificate chaining)
 
 ## Testing
 

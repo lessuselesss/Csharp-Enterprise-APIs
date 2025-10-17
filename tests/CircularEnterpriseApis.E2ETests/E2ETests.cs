@@ -37,26 +37,26 @@ namespace CircularEnterpriseApis.E2ETests
                 return;
             }
 
-            var acc = CEPAccount.NewCEPAccount();
+            var acc = new CEPAccount();
 
             // Open account
             bool opened = acc.Open(address);
-            opened.Should().BeTrue($"acc.Open() failed: {acc.GetLastError()}");
+            opened.Should().BeTrue($"acc.Open() failed: {acc.LastError}");
 
             // Set network to testnet
             string nagURL = acc.SetNetwork("testnet");
-            nagURL.Should().NotBeEmpty($"acc.SetNetwork() failed: {acc.GetLastError()}");
+            nagURL.Should().NotBeEmpty($"acc.SetNetwork() failed: {acc.LastError}");
 
             // Set default blockchain
             acc.SetBlockchain(Common.DefaultChain);
 
             // Update account information
             bool updated = acc.UpdateAccount();
-            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.GetLastError()}");
+            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.LastError}");
 
             // Submit certificate with test message matching Go
             acc.SubmitCertificate("test message from C# E2E test", privateKeyHex);
-            acc.GetLastError().Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.GetLastError()}");
+            acc.LastError.Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.LastError}");
 
             // Verify transaction hash was generated
             string txHash = acc.LatestTxID;
@@ -80,7 +80,7 @@ namespace CircularEnterpriseApis.E2ETests
             }
             else
             {
-                Console.WriteLine($"⏰ E2E transaction polling timeout: {acc.GetLastError()}");
+                Console.WriteLine($"⏰ E2E transaction polling timeout: {acc.LastError}");
                 Console.WriteLine($"💡 Transaction may still be processing: {txHash}");
             }
         }
@@ -96,22 +96,22 @@ namespace CircularEnterpriseApis.E2ETests
                 return;
             }
 
-            var acc = CEPAccount.NewCEPAccount();
+            var acc = new CEPAccount();
 
             bool opened = acc.Open(address);
-            opened.Should().BeTrue($"acc.Open() failed: {acc.GetLastError()}");
+            opened.Should().BeTrue($"acc.Open() failed: {acc.LastError}");
 
             string nagURL = acc.SetNetwork("testnet");
-            nagURL.Should().NotBeEmpty($"acc.SetNetwork() failed: {acc.GetLastError()}");
+            nagURL.Should().NotBeEmpty($"acc.SetNetwork() failed: {acc.LastError}");
 
             acc.SetBlockchain(Common.DefaultChain);
 
             bool updated = acc.UpdateAccount();
-            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.GetLastError()}");
+            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.LastError}");
 
             // Submit certificate with JSON data like Go E2E test
             acc.SubmitCertificate("{\"test\":\"data\"}", privateKeyHex);
-            acc.GetLastError().Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.GetLastError()}");
+            acc.LastError.Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.LastError}");
 
             string txHash = acc.LatestTxID;
             txHash.Should().NotBeEmpty("txHash not found in response");
@@ -132,7 +132,7 @@ namespace CircularEnterpriseApis.E2ETests
             }
             else
             {
-                Console.WriteLine($"⏰ E2E certificate transaction timeout: {acc.GetLastError()}");
+                Console.WriteLine($"⏰ E2E certificate transaction timeout: {acc.LastError}");
                 Console.WriteLine($"💡 Transaction ID for manual verification: {txHash}");
             }
         }
@@ -148,22 +148,22 @@ namespace CircularEnterpriseApis.E2ETests
                 return;
             }
 
-            var acc = CEPAccount.NewCEPAccount();
+            var acc = new CEPAccount();
 
             bool opened = acc.Open(address);
-            opened.Should().BeTrue($"acc.Open() failed: {acc.GetLastError()}");
+            opened.Should().BeTrue($"acc.Open() failed: {acc.LastError}");
 
             string nagURL = acc.SetNetwork("testnet");
-            nagURL.Should().NotBeEmpty($"acc.SetNetwork() failed: {acc.GetLastError()}");
+            nagURL.Should().NotBeEmpty($"acc.SetNetwork() failed: {acc.LastError}");
 
             acc.SetBlockchain(Common.DefaultChain);
 
             bool updated = acc.UpdateAccount();
-            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.GetLastError()}");
+            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.LastError}");
 
             // Submit Hello World message like Go E2E test
             acc.SubmitCertificate("Hello World", privateKeyHex);
-            acc.GetLastError().Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.GetLastError()}");
+            acc.LastError.Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.LastError}");
 
             string txHash = acc.LatestTxID;
             txHash.Should().NotBeEmpty("txHash not found in response");
@@ -185,7 +185,7 @@ namespace CircularEnterpriseApis.E2ETests
             }
             else
             {
-                Console.WriteLine($"⏰ E2E Hello World transaction timeout: {acc.GetLastError()}");
+                Console.WriteLine($"⏰ E2E Hello World transaction timeout: {acc.LastError}");
                 Console.WriteLine($"💡 Transaction ID for manual verification: {txHash}");
             }
         }
@@ -201,21 +201,21 @@ namespace CircularEnterpriseApis.E2ETests
                 return;
             }
 
-            var acc = CEPAccount.NewCEPAccount();
+            var acc = new CEPAccount();
 
             bool opened = acc.Open(address);
-            opened.Should().BeTrue($"acc.Open() failed: {acc.GetLastError()}");
+            opened.Should().BeTrue($"acc.Open() failed: {acc.LastError}");
 
             string nagURL = acc.SetNetwork("testnet");
-            nagURL.Should().NotBeEmpty($"acc.SetNetwork() failed: {acc.GetLastError()}");
+            nagURL.Should().NotBeEmpty($"acc.SetNetwork() failed: {acc.LastError}");
 
             acc.SetBlockchain(Common.DefaultChain);
 
             bool updated = acc.UpdateAccount();
-            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.GetLastError()}");
+            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.LastError}");
 
             // Create a complex certificate using CCertificate class
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
             cert.SetData($"C# E2E Complex Certificate - {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss UTC}");
 
             // Submit the certificate JSON
@@ -223,7 +223,7 @@ namespace CircularEnterpriseApis.E2ETests
             Console.WriteLine($"Submitting complex certificate: {certJson}");
 
             acc.SubmitCertificate(certJson, privateKeyHex);
-            acc.GetLastError().Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.GetLastError()}");
+            acc.LastError.Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.LastError}");
 
             string txHash = acc.LatestTxID;
             txHash.Should().NotBeEmpty("txHash not found in response");
@@ -247,7 +247,7 @@ namespace CircularEnterpriseApis.E2ETests
             }
             else
             {
-                Console.WriteLine($"⏰ E2E complex certificate timeout: {acc.GetLastError()}");
+                Console.WriteLine($"⏰ E2E complex certificate timeout: {acc.LastError}");
                 Console.WriteLine($"💡 Transaction ID for manual verification: {txHash}");
             }
         }
@@ -263,18 +263,18 @@ namespace CircularEnterpriseApis.E2ETests
                 return;
             }
 
-            var acc = CEPAccount.NewCEPAccount();
+            var acc = new CEPAccount();
 
             bool opened = acc.Open(address);
-            opened.Should().BeTrue($"acc.Open() failed: {acc.GetLastError()}");
+            opened.Should().BeTrue($"acc.Open() failed: {acc.LastError}");
 
             string nagURL = acc.SetNetwork("testnet");
-            nagURL.Should().NotBeEmpty($"acc.SetNetwork() failed: {acc.GetLastError()}");
+            nagURL.Should().NotBeEmpty($"acc.SetNetwork() failed: {acc.LastError}");
 
             acc.SetBlockchain(Common.DefaultChain);
 
             bool updated = acc.UpdateAccount();
-            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.GetLastError()}");
+            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.LastError}");
 
             // Simulate real document certification
             var documentHash = "sha256:a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
@@ -304,7 +304,7 @@ namespace CircularEnterpriseApis.E2ETests
             Console.WriteLine($"Document certification metadata: {documentCertificate}");
 
             acc.SubmitCertificate(documentCertificate, privateKeyHex);
-            acc.GetLastError().Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.GetLastError()}");
+            acc.LastError.Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.LastError}");
 
             string txHash = acc.LatestTxID;
             txHash.Should().NotBeEmpty("txHash not found in response");
@@ -326,7 +326,7 @@ namespace CircularEnterpriseApis.E2ETests
             }
             else
             {
-                Console.WriteLine($"⏰ E2E document certification timeout: {acc.GetLastError()}");
+                Console.WriteLine($"⏰ E2E document certification timeout: {acc.LastError}");
                 Console.WriteLine($"💡 Transaction ID for manual verification: {txHash}");
             }
         }

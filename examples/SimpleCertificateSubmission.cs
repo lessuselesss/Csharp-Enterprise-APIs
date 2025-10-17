@@ -36,14 +36,14 @@ namespace CircularEnterpriseApis.Examples
 
                 // Create new account instance
                 Console.WriteLine("🔧 Creating new CEP account...");
-                var account = CEPAccount.NewCEPAccount();
+                var account = new CEPAccount();
 
                 // Open account with address
                 Console.WriteLine($"📂 Opening account: {address}");
                 bool opened = account.Open(address);
                 if (!opened)
                 {
-                    Console.WriteLine($"❌ Failed to open account: {account.GetLastError()}");
+                    Console.WriteLine($"❌ Failed to open account: {account.LastError}");
                     return;
                 }
 
@@ -52,9 +52,9 @@ namespace CircularEnterpriseApis.Examples
                 string nagUrl = account.SetNetwork("testnet");
                 Console.WriteLine($"📡 NAG URL: {nagUrl}");
 
-                if (!string.IsNullOrEmpty(account.GetLastError()))
+                if (!string.IsNullOrEmpty(account.LastError))
                 {
-                    Console.WriteLine($"⚠️  Network warning: {account.GetLastError()}");
+                    Console.WriteLine($"⚠️  Network warning: {account.LastError}");
                 }
 
                 // Update account information
@@ -66,14 +66,14 @@ namespace CircularEnterpriseApis.Examples
                 }
                 else
                 {
-                    Console.WriteLine($"⚠️  Account update failed: {account.GetLastError()}");
+                    Console.WriteLine($"⚠️  Account update failed: {account.LastError}");
                     Console.WriteLine("🚀 Proceeding with certificate submission anyway...");
                 }
 
                 // Create a test certificate
                 Console.WriteLine();
                 Console.WriteLine("📋 Creating test certificate...");
-                var certificate = CCertificate.NewCCertificate();
+                var certificate = new CCertificate();
                 certificate.SetData($"Test certificate created at {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC using C# API");
 
                 string certificateJson = certificate.GetJSONCertificate();
@@ -85,9 +85,9 @@ namespace CircularEnterpriseApis.Examples
                 Console.WriteLine("🚀 Submitting certificate to blockchain...");
                 account.SubmitCertificate(certificateJson, privateKey);
 
-                if (!string.IsNullOrEmpty(account.GetLastError()))
+                if (!string.IsNullOrEmpty(account.LastError))
                 {
-                    Console.WriteLine($"❌ Certificate submission failed: {account.GetLastError()}");
+                    Console.WriteLine($"❌ Certificate submission failed: {account.LastError}");
                     return;
                 }
 
@@ -108,7 +108,7 @@ namespace CircularEnterpriseApis.Examples
                 }
                 else
                 {
-                    Console.WriteLine($"⏰ Transaction confirmation timeout or error: {account.GetLastError()}");
+                    Console.WriteLine($"⏰ Transaction confirmation timeout or error: {account.LastError}");
                     Console.WriteLine($"💡 You can check the transaction later using ID: {txId}");
                 }
 
@@ -142,7 +142,7 @@ namespace CircularEnterpriseApis.Examples
                     return;
                 }
 
-                var account = CEPAccount.NewCEPAccount();
+                var account = new CEPAccount();
                 account.Open(address);
                 account.SetNetwork("testnet");
                 account.UpdateAccount();
@@ -154,21 +154,21 @@ namespace CircularEnterpriseApis.Examples
                 {
                     Console.WriteLine($"\n📋 Creating certificate {i}/3...");
 
-                    var cert = CCertificate.NewCCertificate();
+                    var cert = new CCertificate();
                     cert.SetData($"Chain certificate #{i} - {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}");
 
                     if (i > 1)
                     {
-                        // Link to previous transaction
-                        cert.SetPreviousTxID(account.LatestTxID);
+                        // Link to previous transaction (using property directly)
+                        cert.PreviousTxID = account.LatestTxID;
                     }
 
                     Console.WriteLine($"🚀 Submitting certificate {i}...");
                     account.SubmitCertificate(cert.GetJSONCertificate(), privateKey);
 
-                    if (!string.IsNullOrEmpty(account.GetLastError()))
+                    if (!string.IsNullOrEmpty(account.LastError))
                     {
-                        Console.WriteLine($"❌ Certificate {i} submission failed: {account.GetLastError()}");
+                        Console.WriteLine($"❌ Certificate {i} submission failed: {account.LastError}");
                         break;
                     }
 

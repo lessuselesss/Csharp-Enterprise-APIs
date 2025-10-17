@@ -14,7 +14,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void NewCCertificate_ReturnsValidInstance()
         {
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
 
             cert.Should().NotBeNull();
             cert.Data.Should().Be("");
@@ -26,7 +26,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void SetData_GetData_WorksCorrectly()
         {
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
             string testData = "test certificate data";
 
             cert.SetData(testData);
@@ -38,7 +38,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void SetData_NullData_SetsEmpty()
         {
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
 
             cert.SetData(null!);
             cert.GetData().Should().Be("");
@@ -47,10 +47,10 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void SetPreviousTxID_GetPreviousTxID_WorksCorrectly()
         {
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
             string testTxID = "abc123def456";
 
-            cert.SetPreviousTxID(testTxID);
+            cert.PreviousTxID = testTxID);
             cert.GetPreviousTxID().Should().Be(testTxID);
             cert.PreviousTxID.Should().Be(testTxID);
         }
@@ -58,10 +58,10 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void SetPreviousBlock_GetPreviousBlock_WorksCorrectly()
         {
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
             string testBlock = "block123";
 
-            cert.SetPreviousBlock(testBlock);
+            cert.PreviousBlock = testBlock);
             cert.GetPreviousBlock().Should().Be(testBlock);
             cert.PreviousBlock.Should().Be(testBlock);
         }
@@ -69,10 +69,10 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void GetJSONCertificate_ReturnsValidJSON()
         {
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
             cert.SetData("test data");
-            cert.SetPreviousTxID("tx123");
-            cert.SetPreviousBlock("block456");
+            cert.PreviousTxID = "tx123");
+            cert.PreviousBlock = "block456");
 
             string json = cert.GetJSONCertificate();
 
@@ -92,7 +92,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void GetCertificateSize_ReturnsCorrectSize()
         {
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
             cert.SetData("test");
 
             int size = cert.GetCertificateSize();
@@ -142,7 +142,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void IsValid_WithData_ReturnsTrue()
         {
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
             cert.SetData("some data");
 
             cert.IsValid().Should().BeTrue();
@@ -151,7 +151,7 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void IsValid_WithoutData_ReturnsFalse()
         {
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
 
             cert.IsValid().Should().BeFalse();
         }
@@ -159,9 +159,9 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void Clone_CreatesIndependentCopy()
         {
-            var original = CCertificate.NewCCertificate();
+            var original = new CCertificate();
             original.SetData("original data");
-            original.SetPreviousTxID("original tx");
+            original.PreviousTxID = "original tx");
 
             var clone = original.Clone();
 
@@ -177,10 +177,10 @@ namespace CircularEnterpriseApis.UnitTests
         [Fact]
         public void JSON_Serialization_RoundTrip()
         {
-            var original = CCertificate.NewCCertificate();
+            var original = new CCertificate();
             original.SetData("test data for round trip");
-            original.SetPreviousTxID("tx12345");
-            original.SetPreviousBlock("block67890");
+            original.PreviousTxID = "tx12345");
+            original.PreviousBlock = "block67890");
 
             string json = original.GetJSONCertificate();
             var restored = CCertificate.FromJSON(json);
@@ -196,7 +196,7 @@ namespace CircularEnterpriseApis.UnitTests
         public void Go_Compatibility_HexConversion()
         {
             // Test that matches EXACTLY how Go implementation works
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
             string originalText = "Hello World";
 
             // Go: c.Data = utils.StringToHex(data)
@@ -214,10 +214,10 @@ namespace CircularEnterpriseApis.UnitTests
         public void Go_Compatibility_JSONStructure()
         {
             // Verify JSON structure matches Go exactly
-            var cert = CCertificate.NewCCertificate();
+            var cert = new CCertificate();
             cert.SetData("test");
-            cert.SetPreviousTxID("prev123");
-            cert.SetPreviousBlock("block456");
+            cert.PreviousTxID = "prev123");
+            cert.PreviousBlock = "block456");
 
             string json = cert.GetJSONCertificate();
 

@@ -19,7 +19,7 @@ namespace CircularEnterpriseApis.UnitTests
         public void SubmitCertificate_PayloadConstruction_CreatesCorrectJSONWrapper()
         {
             // Arrange
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
             account.Open(TestAddress);
             account.Nonce = 1; // Set a test nonce
 
@@ -42,7 +42,7 @@ namespace CircularEnterpriseApis.UnitTests
         public void SubmitCertificate_TransactionIDFormat_DoesNotInclude0xPrefix()
         {
             // Arrange
-            var account = CEPAccount.NewCEPAccount();
+            var account = new CEPAccount();
             account.Open(TestAddress);
             account.Nonce = 1;
 

@@ -4,59 +4,68 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **C# implementation** of the Circular Protocol Enterprise APIs that must **STRICTLY adhere** to the API surface and ergonomics established by the reference Go implementation found in `@go-repomix-output.xml`. The goal is to provide identical developer experience so IDE autocompletion works exactly the same across both languages.
+This is a **C# implementation** of the Circular Protocol Enterprise APIs that **aligns with reference implementations** (Node.js, PHP, Java) to provide consistent API surface, ergonomics, and developer experience across all supported languages.
 
-**Critical Requirement**: This C# implementation must honor the Go API surface exactly - same method names, parameter names, return types, and behavioral patterns.
+**Critical Requirement**: This C# implementation maintains API compatibility with reference implementations - same method names, parameter names, return types, and behavioral patterns.
 
-## Reference Architecture (from Go Implementation)
+## Reference Architecture (from Node.js/PHP/Java)
 
-### Core API Surface to Replicate
+### Core API Surface
 
 **Primary Classes:**
-- `CEPAccount` - Main client interface for blockchain operations
-- `CCertificate` - Certificate data structure and operations
+- `CEPAccount` / `CEP_Account` - Main client interface for blockchain operations
+- `CCertificate` / `C_CERTIFICATE` - Certificate data structure and operations
 - `Utils` - Utility functions for hex/string conversion
 
-**Key Methods (must match exactly):**
+**Key Methods (aligned with reference implementations):**
 ```csharp
-// CEPAccount
-public static CEPAccount NewCEPAccount()
-public bool Open(string address)
-public string SetNetwork(string network)
-public bool UpdateAccount()
-public void SubmitCertificate(string pdata, string privateKeyHex)
-public Dictionary<string, object> GetTransactionOutcome(string txID, int timeoutSec, int intervalSec)
+// CEPAccount (matches Node.js/PHP/Java)
+new CEPAccount()                                                    // Constructor
+bool Open(string address)
+string SetNetwork(string network)
+void SetBlockchain(string chain)
+bool UpdateAccount()
+string SignData(string data, string privateKeyHex)               // Node.js/Java
+void SubmitCertificate(string pdata, string privateKeyHex)
+Dictionary<string, object> GetTransaction(string blockID, string txID)
+Dictionary<string, object> GetTransactionOutcome(string txID, int timeoutSec, int intervalSec)
+void Close()
 
-// CCertificate
-public static CCertificate NewCCertificate()
-public void SetData(string data)
-public string GetJSONCertificate()
-public int GetCertificateSize()
+// CCertificate (matches Node.js/Java)
+new CCertificate()                                                 // Constructor
+void SetData(string data)
+string GetData()
+string GetJSONCertificate()
+int GetCertificateSize()
 
-// Utils
-public static string StringToHex(string s)
-public static string HexToString(string hexStr)
-public static string HexFix(string hexStr)
-public static string PadNumber(int num)
-public static string GetFormattedTimestamp()
+// Utils (package-level functions)
+string StringToHex(string s)
+string HexToString(string hexStr)
+string HexFix(string hexStr)
+string PadNumber(int num)
+string GetFormattedTimestamp()
 ```
 
 **Essential Properties:**
 ```csharp
-// CEPAccount properties
+// CEPAccount properties (direct access like PHP)
 public string Address { get; set; }
-public string LastError { get; set; }
+public string LastError { get; set; }              // Access directly, no GetLastError()
 public string LatestTxID { get; set; }
 public long Nonce { get; set; }
 public string NAGURL { get; set; }
 public string NetworkNode { get; set; }
 public string Blockchain { get; set; }
+
+// CCertificate properties (for advanced chaining)
+public string PreviousTxID { get; set; }          // Direct property access
+public string PreviousBlock { get; set; }         // Direct property access
 ```
 
-### API Design Patterns from Go Reference
+### API Design Patterns from Reference Implementations
 
-1. **Error Handling**: No exceptions thrown - errors stored in `LastError` property
-2. **Factory Pattern**: Use static `New*()` methods instead of constructors
+1. **Error Handling**: No exceptions thrown - errors stored in `LastError` property (PHP pattern)
+2. **Instantiation**: Standard constructors `new CEPAccount()` (Node.js/PHP/Java pattern)
 3. **Hex Encoding**: All blockchain data in hex format with automatic conversion
 4. **Network Discovery**: Dynamic NAG URL resolution via HTTP calls
 5. **Cryptographic Requirements**: ECDSA with secp256k1, SHA-256 hashing, RFC 6979 deterministic signatures
@@ -88,18 +97,18 @@ dotnet test --logger "console;verbosity=detailed"
 ```
 /
 ├── src/
-│   ├── CircularEnterpriseApis/          # Main library project
-│   │   ├── CEPAccount.cs
-│   │   ├── CCertificate.cs
-│   │   ├── Common.cs
-│   │   └── Utils/
-│   │       └── Utils.cs
-│   └── CircularEnterpriseApis.Examples/ # Example usage
+│   └── CircularEnterpriseApis/          # Main library project
+│       ├── CEPAccount.cs
+│       ├── CCertificate.cs
+│       ├── CircularEnterpriseApis.cs
+│       ├── Common.cs
+│       ├── Crypto/
+│       └── Utils/
 ├── tests/
 │   ├── CircularEnterpriseApis.UnitTests/
 │   ├── CircularEnterpriseApis.IntegrationTests/
 │   └── CircularEnterpriseApis.E2ETests/
-├── examples/
+├── examples/                            # Example usage project
 └── CircularEnterpriseApis.sln
 ```
 
@@ -167,8 +176,8 @@ public static string NetworkURL = "https://circularlabs.io/network/getNAG?networ
 **Environment Setup** for tests:
 ```bash
 # Copy environment template
-cp appsettings.example.json appsettings.Development.json
-# Configure CIRCULAR_PRIVATE_KEY and CIRCULAR_ADDRESS
+cp .env.example .env
+# Configure CIRCULAR_PRIVATE_KEY and CIRCULAR_ADDRESS in .env file
 ```
 
 ### JSON Request Formats (must match Go exactly)
@@ -191,18 +200,17 @@ cp appsettings.example.json appsettings.Development.json
 
 ## Development Workflow
 
-1. **Reference Go Implementation**: Always check `@go-repomix-output.xml` for exact API patterns
-2. **Test-Driven Development**: Write tests that mirror Go test patterns first
-3. **API Compatibility**: Validate that C# API provides identical IntelliSense experience
+1. **Reference Implementation Compatibility**: Check Circular Protocol's reference implementations (Node.js, PHP, Java) for exact API patterns and ergonomics
+2. **Test-Driven Development**: Write tests that mirror reference implementation test patterns first
+3. **API Compatibility**: Validate that C# API provides identical developer experience to other language implementations
 4. **Network Testing**: Use testnet for integration testing to avoid mainnet costs
-5. **Cryptographic Validation**: Ensure signatures are RFC 6979 compliant and match Go output
+5. **Cryptographic Validation**: Ensure signatures are RFC 6979 compliant and match reference implementations
 
-## Context7 Integration
+## Enhanced Features (Feature Branch)
 
-Use Context7 to reference Circular Protocol Enterprise API documentation when implementing blockchain-specific functionality:
+The `feature/certificate-chaining` branch contains C#-specific enhancements not present in reference implementations:
 
-```bash
-# Get Circular Protocol documentation
-context7 resolve-library-id "Circular Protocol"
-context7 get-library-docs <library-id> --topic "enterprise apis"
-```
+- Certificate chaining methods (SetPreviousTxID, GetPreviousTxID, SetPreviousBlock, GetPreviousBlock)
+- GetLastError() convenience method
+
+These are maintained separately for developers who need advanced functionality beyond the standard API surface.

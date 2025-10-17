@@ -40,24 +40,18 @@ namespace CircularEnterpriseApis
         public string Version { get; set; } = Constants.LibVersion;
 
         /// <summary>
-        /// Factory method matching Go: NewCCertificate() *CCertificate
-        /// Creates a new certificate instance with default values
+        /// Creates a new CCertificate instance
+        /// Matches Node.js/PHP/Java: new CCertificate()
         /// </summary>
-        public static CCertificate NewCCertificate()
+        public CCertificate()
         {
-            return new CCertificate
-            {
-                Data = "",
-                PreviousTxID = "",
-                PreviousBlock = "",
-                Version = Constants.LibVersion
-            };
+            // Initialize with default values (already set by property initializers)
         }
 
         /// <summary>
         /// Sets the certificate data
-        /// Maps to Go: func (c *CCertificate) SetData(data string)
-        /// EXACTLY matches Go behavior: converts string to hex automatically
+        /// Matches Node.js/Java: setData(data)
+        /// Converts string to hex automatically
         /// </summary>
         public void SetData(string data)
         {
@@ -66,8 +60,8 @@ namespace CircularEnterpriseApis
 
         /// <summary>
         /// Gets the certificate data
-        /// Maps to Go: func (c *CCertificate) GetData() string
-        /// EXACTLY matches Go behavior: converts hex back to original string
+        /// Matches Node.js/Java: getData()
+        /// Converts hex back to original string
         /// </summary>
         public string GetData()
         {
@@ -75,45 +69,8 @@ namespace CircularEnterpriseApis
         }
 
         /// <summary>
-        /// Sets the previous transaction ID
-        /// Maps to Go: func (c *CCertificate) SetPreviousTxID(txID string)
-        /// </summary>
-        public void SetPreviousTxID(string txID)
-        {
-            PreviousTxID = txID ?? "";
-        }
-
-        /// <summary>
-        /// Gets the previous transaction ID
-        /// Maps to Go: func (c *CCertificate) GetPreviousTxID() string
-        /// </summary>
-        public string GetPreviousTxID()
-        {
-            return PreviousTxID;
-        }
-
-        /// <summary>
-        /// Sets the previous block
-        /// Maps to Go: func (c *CCertificate) SetPreviousBlock(block string)
-        /// </summary>
-        public void SetPreviousBlock(string block)
-        {
-            PreviousBlock = block ?? "";
-        }
-
-        /// <summary>
-        /// Gets the previous block
-        /// Maps to Go: func (c *CCertificate) GetPreviousBlock() string
-        /// </summary>
-        public string GetPreviousBlock()
-        {
-            return PreviousBlock;
-        }
-
-        /// <summary>
         /// Converts certificate to JSON string format
-        /// Maps to Go: func (c *CCertificate) GetJSONCertificate() string
-        /// Must produce identical JSON output to Go implementation
+        /// Matches Node.js/Java: getJsonCertificate()
         /// </summary>
         public string GetJSONCertificate()
         {
@@ -135,7 +92,7 @@ namespace CircularEnterpriseApis
 
         /// <summary>
         /// Gets the size of the certificate in bytes
-        /// Maps to Go: func (c *CCertificate) GetCertificateSize() int
+        /// Matches Node.js/Java: getCertificateSize()
         /// </summary>
         public int GetCertificateSize()
         {
