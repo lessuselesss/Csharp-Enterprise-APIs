@@ -150,8 +150,8 @@ namespace CircularEnterpriseApis.UnitTests
             // Go reference: cert.GetJSONCertificate() returns JSON string
             var cert = new CCertificate();
             cert.SetData("test");
-            cert.PreviousTxID = "0x123");
-            cert.PreviousBlock = "0x456");
+            cert.PreviousTxID = "0x123";
+            cert.PreviousBlock = "0x456";
 
             string json = cert.GetJSONCertificate();
 

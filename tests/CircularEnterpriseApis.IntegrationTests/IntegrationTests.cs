@@ -279,7 +279,7 @@ namespace CircularEnterpriseApis.IntegrationTests
                 if (i > 0)
                 {
                     // Link to previous transaction
-                    cert.PreviousTxID = txHashes[i - 1]);
+                    cert.PreviousTxID = txHashes[i - 1];
                 }
 
                 string certJson = cert.GetJSONCertificate();
