@@ -236,7 +236,7 @@ namespace CircularEnterpriseApis.UnitTests
                 Common.GetNAG("");
                 Assert.True(false, "Should have thrown exception");
             }
-            catch (ArgumentException ex)
+            catch (InvalidOperationException ex)
             {
                 Assert.Contains("network identifier cannot be empty", ex.Message);
             }

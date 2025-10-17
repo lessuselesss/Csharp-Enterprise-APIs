@@ -104,73 +104,8 @@ namespace CircularEnterpriseApis.UnitTests
             size.Should().Be(expectedSize);
         }
 
-        [Fact]
-        public void FromJSON_ValidJSON_ReturnsCorrectCertificate()
-        {
-            string json = "{\"data\":\"746573742064617461\",\"previousTxID\":\"tx123\",\"previousBlock\":\"block456\",\"version\":\"1.0.13\"}"; // 'test data' as hex
-
-            var cert = CCertificate.FromJSON(json);
-
-            cert.Should().NotBeNull();
-            cert!.GetData().Should().Be("test data"); // Use GetData() which converts from hex
-            cert.Data.Should().Be("746573742064617461"); // Raw Data field should be hex
-            cert.PreviousTxID.Should().Be("tx123");
-            cert.PreviousBlock.Should().Be("block456");
-            cert.Version.Should().Be("1.0.13");
-        }
-
-        [Fact]
-        public void FromJSON_InvalidJSON_ReturnsNull()
-        {
-            string invalidJson = "invalid json";
-
-            var cert = CCertificate.FromJSON(invalidJson);
-
-            cert.Should().BeNull();
-        }
-
-        [Fact]
-        public void FromJSON_EmptyString_ReturnsNull()
-        {
-            var cert = CCertificate.FromJSON("");
-
-            cert.Should().BeNull();
-        }
-
-        [Fact]
-        public void IsValid_WithData_ReturnsTrue()
-        {
-            var cert = new CCertificate();
-            cert.SetData("some data");
-
-            cert.IsValid().Should().BeTrue();
-        }
-
-        [Fact]
-        public void IsValid_WithoutData_ReturnsFalse()
-        {
-            var cert = new CCertificate();
-
-            cert.IsValid().Should().BeFalse();
-        }
-
-        [Fact]
-        public void Clone_CreatesIndependentCopy()
-        {
-            var original = new CCertificate();
-            original.SetData("original data");
-            original.PreviousTxID = "original tx";
-
-            var clone = original.Clone();
-
-            clone.Should().NotBeSameAs(original);
-            clone.Data.Should().Be(original.Data);
-            clone.PreviousTxID.Should().Be(original.PreviousTxID);
-
-            // Modify clone - should not affect original
-            clone.SetData("modified data");
-            original.GetData().Should().Be("original data"); // Check using GetData() for proper comparison
-        }
+        // Note: FromJSON, IsValid, and Clone methods removed during API alignment
+        // These were C#-specific utilities not present in Node.js/PHP/Java reference implementations
 
         [Fact]
         public void JSON_Serialization_RoundTrip()
@@ -181,7 +116,7 @@ namespace CircularEnterpriseApis.UnitTests
             original.PreviousBlock = "block67890";
 
             string json = original.GetJSONCertificate();
-            var restored = CCertificate.FromJSON(json);
+            var restored = JsonSerializer.Deserialize<CCertificate>(json);
 
             restored.Should().NotBeNull();
             restored!.Data.Should().Be(original.Data);

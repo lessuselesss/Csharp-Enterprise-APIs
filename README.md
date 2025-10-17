@@ -1,107 +1,100 @@
 # Circular Enterprise APIs - C# Implementation
 
-Official Circular Protocol Enterprise APIs for Data Certification - C# Implementation
+## Overview
+This is the official C# implementation of the Circular Protocol Enterprise APIs for data certification. The repository provides tools for blockchain interaction, account management, and certificate handling.
 
-## Features
+## Key Features
+The library supports account management with blockchain interaction, certificate creation and submission capabilities, transaction tracking and verification, and secure digital signatures using ECDSA (secp256k1) with RFC 6979 compliant deterministic signatures.
 
-- Account management and blockchain interaction
-- Certificate creation and submission
-- Transaction tracking and verification
-- Secure digital signatures using ECDSA (secp256k1)
-- RFC 6979 compliant deterministic signatures
-
-## Requirements
-
+## Technical Requirements
 - .NET 6.0 or higher
+- NuGet package manager
 
 ## Dependencies
-
-- `System.Security.Cryptography` for secp256k1 elliptic curve operations
-- `System.Text.Json` for JSON serialization
-- `System.Net.Http` for network requests
+The project relies on BouncyCastle.Cryptography for cryptographic operations (secp256k1), System.Text.Json for JSON processing, and System.Net.Http for network requests.
 
 ## Installation
-
-To use this library in your project, you can use `dotnet add package`:
+Install via NuGet Package Manager:
 
 ```bash
 dotnet add package CircularEnterpriseApis
 ```
 
-## Usage Example
+Or clone the repository and build using:
 
-See `examples/Program.cs` for a basic example of how to use the API to submit a certificate. You can run it with:
+```bash
+dotnet build
+```
+
+## Main API Classes
+
+**CEPAccount Class** provides core blockchain functionality including:
+- Opening accounts with `Open(string address)`
+- Closing accounts via `Close()`
+- Network configuration through `SetNetwork(string network)`
+- Blockchain identifier setting with `SetBlockchain(string chain)`
+- Data signing with `SignData(string data, string privateKeyHex)`
+- Account updates using `UpdateAccount()`
+- Certificate submission through `SubmitCertificate(string pdata, string privateKeyHex)`
+- Transaction retrieval with `GetTransaction(string blockID, string transactionID)`
+- Transaction outcome polling via `GetTransactionOutcome(string txID, int timeoutSec, int intervalSec)`
+
+**CCertificate Class** manages certificate operations:
+- Setting certificate data with `SetData(string data)`
+- Retrieving data via `GetData()`
+- JSON format export through `GetJSONCertificate()`
+- Size calculation with `GetCertificateSize()`
+
+**Properties:** The CCertificate class includes `PreviousTxID` and `PreviousBlock` properties for certificate chaining support.
+
+## Usage Examples
+
+See `examples/SimpleCertificateSubmission.cs` for a complete example of certificate submission. Run the example with:
 
 ```bash
 dotnet run --project examples
 ```
 
-A more detailed example can be found in `examples/SimpleCertificateSubmission.cs`.
+Basic usage pattern:
 
-## API Documentation
+```csharp
+using CircularEnterpriseApis;
 
-### CEPAccount Class
+// Create and configure account
+var account = new CEPAccount();
+account.Open("0xYourWalletAddress");
+account.SetNetwork("testnet");
+account.UpdateAccount();
 
-Main class for interacting with the Circular blockchain:
+// Create and submit certificate
+var certificate = new CCertificate();
+certificate.SetData("Your data to certify");
+account.SubmitCertificate(certificate.GetJSONCertificate(), "your_private_key_hex");
 
-- `new CEPAccount()` - Creates a new CEPAccount instance
-- `Open(string address) bool` - Initializes the account with a specified blockchain address
-- `Close()` - Clears all sensitive and operational data from the account
-- `SetNetwork(string network) string` - Configures the account to operate on a specific blockchain network
-- `SetBlockchain(string chain)` - Explicitly sets the blockchain identifier for the account
-- `UpdateAccount() bool` - Fetches the latest nonce for the account from the NAG
-- `SignData(string data, string privateKeyHex) string` - Signs data using the provided private key
-- `SubmitCertificate(string pdata, string privateKeyHex)` - Creates, signs, and submits a data certificate to the blockchain
-- `GetTransaction(string blockID, string transactionID) Dictionary<string, object>` - Retrieves transaction details by block and transaction ID
-- `GetTransactionOutcome(string txID, int timeoutSec, int intervalSec) Dictionary<string, object>` - Polls for the final status of a transaction
+// Get transaction outcome
+var outcome = account.GetTransactionOutcome(account.LatestTxID, 30, 5);
+```
 
-**Properties:**
-- `LastError` - Last error message (access directly instead of using GetLastError())
-
-### CCertificate Class
-
-Class for managing certificates:
-
-- `new CCertificate()` - Creates a new CCertificate instance
-- `SetData(string data)` - Sets the primary data content of the certificate
-- `GetData() string` - Retrieves the primary data content from the certificate
-- `GetJSONCertificate() string` - Serializes the certificate object into a JSON string
-- `GetCertificateSize() int` - Calculates the size of the JSON-serialized certificate in bytes
-
-**Properties:**
-- `PreviousTxID` - Previous transaction ID (for certificate chaining)
-- `PreviousBlock` - Previous block identifier (for certificate chaining)
-
-## Testing
-
-To run the tests, you need to set up a `.env` file in the project root. You can copy the `.env.example` file to get started:
+## Testing Setup
+Tests require environment variables: `CIRCULAR_PRIVATE_KEY` (64-character hex string) and `CIRCULAR_ADDRESS` (Ethereum-style address with 0x prefix). Set these in your environment or create a `.env` file:
 
 ```bash
 cp .env.example .env
+# Edit .env with your credentials
 ```
 
-Then, edit the `.env` file with your credentials:
-
-```
-CIRCULAR_PRIVATE_KEY="your_64_character_private_key_here"
-CIRCULAR_ADDRESS="your_wallet_address_here"
-```
-
-The private key should be a 64-character (32-byte) hex string, and the address should be a valid Ethereum-style address (40 characters + 0x prefix).
-
-### Running Tests
+Run tests with:
 
 ```bash
 dotnet test
 ```
 
-## License
+## Building
+Package the project using:
 
-MIT License - see LICENSE file for details
+```bash
+dotnet pack
+```
 
-## Credits
-
-CIRCULAR GLOBAL LEDGERS, INC. - USA
-
-- Original JS Version: Gianluca De Novi, PhD
-- Go Implementation: Danny De Novi
+## Licensing & Attribution
+Licensed under MIT. Created by Circular Global Ledgers, Inc. (USA), with original JavaScript version by Gianluca De Novi, PhD, and C# implementation by Danny De Novi.

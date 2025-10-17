@@ -15,7 +15,7 @@ namespace CircularEnterpriseApis.Examples
             try
             {
                 Console.WriteLine("=== Circular Protocol C# Enterprise API Example ===");
-                Console.WriteLine($"Library Version: {Common.LibVersion}");
+                Console.WriteLine($"Library Version: {Constants.LibVersion}");
                 Console.WriteLine();
 
                 // Get environment variables (same as Go implementation)

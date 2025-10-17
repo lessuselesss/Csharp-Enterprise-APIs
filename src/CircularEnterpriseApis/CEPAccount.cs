@@ -123,7 +123,7 @@ namespace CircularEnterpriseApis
             var (url, error) = CircularEnterpriseApis.GetNAG(network);
             if (error != null)
             {
-                LastError = $"network discovery failed: {error.Message}";
+                LastError = $"network discovery failed: {error}";
                 return "";
             }
 
