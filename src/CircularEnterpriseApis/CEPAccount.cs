@@ -129,6 +129,7 @@ namespace CircularEnterpriseApis
         /// Configures the CEPAccount to operate on a specific blockchain network
         /// Maps to Go: func (a *CEPAccount) SetNetwork(network string) string
         /// </summary>
+        [Obsolete("Use SetNetworkAsync() instead. Synchronous methods will be removed in v2.0.0.", false)]
         public string SetNetwork(string network)
         {
             // Use package-level GetNAG with Go-style error handling
@@ -194,6 +195,7 @@ namespace CircularEnterpriseApis
         /// Updates account information by retrieving the current nonce
         /// Matches Node.js/PHP/Java: updateAccount()
         /// </summary>
+        [Obsolete("Use UpdateAccountAsync() instead. Synchronous methods will be removed in v2.0.0.", false)]
         public bool UpdateAccount()
         {
             try
@@ -317,6 +319,7 @@ namespace CircularEnterpriseApis
         /// Submits a certificate to the blockchain
         /// Maps to Go: func (a *CEPAccount) SubmitCertificate(pdata string, privateKeyHex string)
         /// </summary>
+        [Obsolete("Use SubmitCertificateAsync() instead. Synchronous methods will be removed in v2.0.0.", false)]
         public void SubmitCertificate(string pdata, string privateKeyHex)
         {
             try
@@ -437,6 +440,7 @@ namespace CircularEnterpriseApis
         /// Retrieves a specific transaction by its block ID and transaction ID
         /// Maps to Go: func (a *CEPAccount) GetTransaction(blockID string, transactionID string) map[string]interface{}
         /// </summary>
+        [Obsolete("Use GetTransactionAsync() instead. Synchronous methods will be removed in v2.0.0.", false)]
         public Dictionary<string, object>? GetTransaction(string blockID, string transactionID)
         {
             try
@@ -532,6 +536,7 @@ namespace CircularEnterpriseApis
         /// Maps to Go: func (a *CEPAccount) GetTransactionOutcome(txID string, timeoutSec int, intervalSec int) map[string]interface{}
         /// EXACTLY matches Go implementation: uses polling with getTransactionByID, checks status != "Pending"
         /// </summary>
+        [Obsolete("Use GetTransactionOutcomeAsync() instead. Synchronous methods will be removed in v2.0.0.", false)]
         public Dictionary<string, object>? GetTransactionOutcome(string txID, int timeoutSec, int intervalSec)
         {
             try

@@ -47,6 +47,7 @@ namespace CircularEnterpriseApis
         /// Maps to Go: func GetNAG(network string) (string, error)
         /// Returns (url, error) tuple instead of throwing exceptions
         /// </summary>
+        [Obsolete("Use GetNAGAsync() instead. Synchronous methods will be removed in v2.0.0.", false)]
         public static (string url, string? error) GetNAGInternal(string network)
         {
             if (string.IsNullOrEmpty(network))
@@ -208,9 +209,9 @@ namespace CircularEnterpriseApis
 
         /// <summary>
         /// Legacy wrapper that throws exceptions - DEPRECATED
-        /// Use GetNAGInternal for Go-style error handling
+        /// Use GetNAGAsync for async operations
         /// </summary>
-        [Obsolete("Use GetNAGInternal for Go-style error handling")]
+        [Obsolete("Use GetNAGAsync() instead. Synchronous methods will be removed in v2.0.0.", false)]
         public static string GetNAG(string network)
         {
             var (url, error) = GetNAGInternal(network);
