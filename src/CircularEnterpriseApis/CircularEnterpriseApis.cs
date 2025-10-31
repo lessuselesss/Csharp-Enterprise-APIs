@@ -18,17 +18,6 @@ namespace CircularEnterpriseApis
         public static string NetworkURL = Constants.NetworkURL;
 
         /// <summary>
-        /// Package-level NAG discovery function matching Go exactly
-        /// Maps to Go: func GetNAG(network string) (string, error)
-        /// Returns Go-style tuple: (url, errorMessage) instead of throwing exceptions
-        /// </summary>
-        [Obsolete("Use GetNAGAsync() instead. Synchronous methods will be removed in v2.0.0.", false)]
-        public static (string url, string? error) GetNAG(string network)
-        {
-            return Common.GetNAGInternal(network);
-        }
-
-        /// <summary>
         /// Async package-level NAG discovery function matching Rust
         /// Maps to Rust: pub async fn get_nag(network: &str) -> Result<String, String>
         /// Returns tuple: (url, errorMessage) instead of throwing exceptions
