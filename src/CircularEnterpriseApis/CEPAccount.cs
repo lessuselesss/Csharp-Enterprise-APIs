@@ -47,7 +47,7 @@ namespace CircularEnterpriseApis
         public long Nonce { get; set; }
 
         /// <summary>Interval in seconds for polling operations - Maps to Go: IntervalSec int</summary>
-        public int IntervalSec { get; set; } = 5;
+        public int IntervalSec { get; set; } = 2;  // Matches Rust default
 
         /// <summary>Network URL for NAG discovery - Maps to Go: NetworkURL string</summary>
         public string NetworkURL { get; set; } = Constants.NetworkURL;
@@ -146,12 +146,13 @@ namespace CircularEnterpriseApis
 
         /// <summary>
         /// Signs data using the provided private key
-        /// Matches Node.js/Java: signData(data, privateKey)
+        /// INTERNAL: Not part of public API - matches Rust/Go reference implementations
+        /// Signing is an internal operation used by SubmitCertificate
         /// </summary>
         /// <param name="data">Data to sign</param>
         /// <param name="privateKeyHex">Private key in hex format</param>
         /// <returns>Signature in hex format, or empty string on error</returns>
-        public string SignData(string data, string privateKeyHex)
+        internal string SignData(string data, string privateKeyHex)
         {
             try
             {

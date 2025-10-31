@@ -1,6 +1,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Sec;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
@@ -15,9 +16,10 @@ namespace CircularEnterpriseApis.Crypto
 {
     /// <summary>
     /// Cryptographic utilities for ECDSA signing with secp256k1
-    /// Must match Go implementation exactly for compatibility
+    /// INTERNAL: Not part of public API - matches Rust/Go reference implementations
+    /// Crypto operations are private implementation details for security
     /// </summary>
-    public static class CryptoUtils
+    internal static class CryptoUtils
     {
         private static readonly ECDomainParameters secp256k1;
 
@@ -103,7 +105,8 @@ namespace CircularEnterpriseApis.Crypto
 
         /// <summary>
         /// Signs a message hash using ECDSA with RFC 6979 deterministic signatures
-        /// This MUST produce identical signatures to the Go implementation
+        /// Uses DER encoding to match Rust reference implementation exactly
+        /// Rust: sig.serialize_der() produces ASN.1 DER encoded signature
         /// </summary>
         public static string SignMessage(string privateKeyHex, string message)
         {
@@ -128,23 +131,14 @@ namespace CircularEnterpriseApis.Crypto
                     s = secp256k1.N.Subtract(s);
                 }
 
-                // Convert to hex format matching Go output
-                byte[] rBytes = r.ToByteArrayUnsigned();
-                byte[] sBytes = s.ToByteArrayUnsigned();
+                // Encode signature in DER format (ASN.1) to match Rust reference
+                // Rust: sig.serialize_der() -> SEQUENCE { INTEGER r, INTEGER s }
+                var derSignature = new DerSequence(
+                    new DerInteger(r),
+                    new DerInteger(s)
+                ).GetDerEncoded();
 
-                // Pad to 32 bytes each
-                byte[] rPadded = new byte[32];
-                byte[] sPadded = new byte[32];
-
-                Array.Copy(rBytes, 0, rPadded, 32 - rBytes.Length, rBytes.Length);
-                Array.Copy(sBytes, 0, sPadded, 32 - sBytes.Length, sBytes.Length);
-
-                // Concatenate r and s
-                byte[] fullSignature = new byte[64];
-                Array.Copy(rPadded, 0, fullSignature, 0, 32);
-                Array.Copy(sPadded, 0, fullSignature, 32, 32);
-
-                return BitConverter.ToString(fullSignature).Replace("-", "").ToLowerInvariant();
+                return BitConverter.ToString(derSignature).Replace("-", "").ToLowerInvariant();
             }
             catch (Exception ex)
             {
@@ -153,22 +147,20 @@ namespace CircularEnterpriseApis.Crypto
         }
 
         /// <summary>
-        /// Verifies an ECDSA signature
+        /// Verifies an ECDSA signature (DER encoded format)
         /// </summary>
         public static bool VerifySignature(string publicKeyHex, string message, string signatureHex)
         {
             try
             {
-                // Parse signature
+                // Parse DER-encoded signature
                 signatureHex = HexFix(signatureHex);
-                if (signatureHex.Length != 128) // 64 bytes = 128 hex chars
-                    return false;
+                byte[] signatureBytes = HexStringToBytes(signatureHex);
 
-                byte[] rBytes = HexStringToBytes(signatureHex.Substring(0, 64));
-                byte[] sBytes = HexStringToBytes(signatureHex.Substring(64, 64));
-
-                BigInteger r = new BigInteger(1, rBytes);
-                BigInteger s = new BigInteger(1, sBytes);
+                // Decode DER signature: SEQUENCE { INTEGER r, INTEGER s }
+                var derSequence = (DerSequence)Asn1Object.FromByteArray(signatureBytes);
+                var r = ((DerInteger)derSequence[0]).Value;
+                var s = ((DerInteger)derSequence[1]).Value;
 
                 // Parse public key
                 publicKeyHex = HexFix(publicKeyHex);
@@ -215,28 +207,7 @@ namespace CircularEnterpriseApis.Crypto
             }
         }
 
-        /// <summary>
-        /// Derives Ethereum-style address from public key
-        /// Not used in Circular Protocol but included for completeness
-        /// </summary>
-        public static string GetEthereumAddress(ECPublicKeyParameters publicKey)
-        {
-            try
-            {
-                byte[] pubKeyBytes = publicKey.Q.GetEncoded(false); // Uncompressed format
-                byte[] pubKeyNoPrefix = new byte[64]; // Remove 0x04 prefix
-                Array.Copy(pubKeyBytes, 1, pubKeyNoPrefix, 0, 64);
-
-                byte[] addressBytes = Sha256(pubKeyNoPrefix);
-                byte[] last20Bytes = new byte[20];
-                Array.Copy(addressBytes, addressBytes.Length - 20, last20Bytes, 0, 20);
-
-                return "0x" + BitConverter.ToString(last20Bytes).Replace("-", "").ToLowerInvariant();
-            }
-            catch
-            {
-                return "";
-            }
-        }
+        // GetEthereumAddress removed - not part of Circular Protocol API spec
+        // Not present in Rust/Go/C++ reference implementations
     }
 }
