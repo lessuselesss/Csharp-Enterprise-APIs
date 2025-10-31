@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace CircularEnterpriseApis
 {
@@ -24,6 +25,16 @@ namespace CircularEnterpriseApis
         public static (string url, string? error) GetNAG(string network)
         {
             return Common.GetNAGInternal(network);
+        }
+
+        /// <summary>
+        /// Async package-level NAG discovery function matching Rust
+        /// Maps to Rust: pub async fn get_nag(network: &str) -> Result<String, String>
+        /// Returns tuple: (url, errorMessage) instead of throwing exceptions
+        /// </summary>
+        public static async Task<(string url, string? error)> GetNAGAsync(string network)
+        {
+            return await Common.GetNAGAsync(network);
         }
 
         // Package-level utility functions matching Go utils package exactly

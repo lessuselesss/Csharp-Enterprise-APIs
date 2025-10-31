@@ -107,5 +107,52 @@ namespace CircularEnterpriseApis
             }
         }
 
+        #region Cross-Language API Compatibility Methods
+
+        /// <summary>
+        /// Sets the previous transaction ID
+        /// Matches Rust: set_previous_tx_id(&mut self, tx_id: &str)
+        /// Provides method-based API for cross-language compatibility
+        /// </summary>
+        /// <param name="txId">Previous transaction ID</param>
+        public void SetPreviousTxId(string txId)
+        {
+            PreviousTxID = txId;
+        }
+
+        /// <summary>
+        /// Gets the previous transaction ID
+        /// Matches Rust: get_previous_tx_id(&self) -> String
+        /// Provides method-based API for cross-language compatibility
+        /// </summary>
+        /// <returns>Previous transaction ID</returns>
+        public string GetPreviousTxId()
+        {
+            return PreviousTxID;
+        }
+
+        /// <summary>
+        /// Sets the previous block identifier
+        /// Matches Rust: set_previous_block(&mut self, block: &str)
+        /// Provides method-based API for cross-language compatibility
+        /// </summary>
+        /// <param name="block">Previous block identifier</param>
+        public void SetPreviousBlock(string block)
+        {
+            PreviousBlock = block;
+        }
+
+        /// <summary>
+        /// Gets the previous block identifier
+        /// Matches Rust: get_previous_block(&self) -> String
+        /// Provides method-based API for cross-language compatibility
+        /// </summary>
+        /// <returns>Previous block identifier</returns>
+        public string GetPreviousBlock()
+        {
+            return PreviousBlock;
+        }
+
+        #endregion
     }
 }

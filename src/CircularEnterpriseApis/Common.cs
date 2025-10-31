@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace CircularEnterpriseApis
 {
@@ -122,6 +123,86 @@ namespace CircularEnterpriseApis
             catch (AggregateException ex) when (ex.InnerException is HttpRequestException)
             {
                 return ("", $"failed to fetch NAG URL: {ex.InnerException.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Async NAG discovery function - matches Rust async fn get_nag
+        /// Maps to Rust: pub async fn get_nag(network: &str) -> Result<String, String>
+        /// Returns (url, error) tuple instead of throwing exceptions
+        /// </summary>
+        public static async Task<(string url, string? error)> GetNAGAsync(string network)
+        {
+            if (string.IsNullOrEmpty(network))
+                return ("", "network identifier cannot be empty");
+
+            try
+            {
+                string url = Constants.NetworkURL + network;
+                // Async HTTP call - matches Rust async implementation
+                HttpResponseMessage httpResponse = await httpClient.GetAsync(url);
+
+                if (!httpResponse.IsSuccessStatusCode)
+                {
+                    return ("", $"network discovery failed with status: {httpResponse.StatusCode}");
+                }
+
+                string response = await httpResponse.Content.ReadAsStringAsync();
+
+                // Parse JSON response to extract NAG URL - matches Go implementation exactly
+                using (JsonDocument doc = JsonDocument.Parse(response))
+                {
+                    // Handle Go's expected response format: {"status":"success", "url":"...", "message":"OK"}
+                    if (doc.RootElement.TryGetProperty("status", out JsonElement statusElement))
+                    {
+                        string status = statusElement.GetString() ?? "";
+
+                        if (status == "error")
+                        {
+                            string message = "";
+                            if (doc.RootElement.TryGetProperty("message", out JsonElement messageElement))
+                            {
+                                message = messageElement.GetString() ?? "";
+                            }
+                            return ("", $"failed to get valid NAG URL from response: {message}");
+                        }
+
+                        if (status == "success" && doc.RootElement.TryGetProperty("url", out JsonElement urlElement))
+                        {
+                            string? nagUrl = urlElement.GetString();
+                            if (!string.IsNullOrEmpty(nagUrl))
+                                return (nagUrl, null);
+                        }
+                    }
+
+                    // Try alternative format for backward compatibility
+                    if (doc.RootElement.TryGetProperty("Result", out JsonElement resultElement) &&
+                        resultElement.GetInt32() == 200 &&
+                        doc.RootElement.TryGetProperty("Response", out JsonElement responseElement))
+                    {
+                        // Handle both "nagurl" and "url" field names
+                        JsonElement urlElementAlt;
+                        bool foundUrl = responseElement.TryGetProperty("nagurl", out urlElementAlt) ||
+                                       responseElement.TryGetProperty("url", out urlElementAlt);
+
+                        if (foundUrl)
+                        {
+                            string? nagUrl = urlElementAlt.GetString();
+                            if (!string.IsNullOrEmpty(nagUrl))
+                                return (nagUrl, null);
+                        }
+                    }
+                }
+
+                return ("", "failed to get valid NAG URL from response");
+            }
+            catch (JsonException ex)
+            {
+                return ("", $"failed to unmarshal NAG response: {ex.Message}");
+            }
+            catch (HttpRequestException ex)
+            {
+                return ("", $"failed to fetch NAG URL: {ex.Message}");
             }
         }
 
