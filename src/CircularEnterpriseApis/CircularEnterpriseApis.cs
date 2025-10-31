@@ -22,6 +22,7 @@ namespace CircularEnterpriseApis
         /// Maps to Go: func GetNAG(network string) (string, error)
         /// Returns Go-style tuple: (url, errorMessage) instead of throwing exceptions
         /// </summary>
+        [Obsolete("Use GetNAGAsync() instead. Synchronous methods will be removed in v2.0.0.", false)]
         public static (string url, string? error) GetNAG(string network)
         {
             return Common.GetNAGInternal(network);
