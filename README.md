@@ -1,17 +1,27 @@
 # Circular Enterprise APIs - C# Implementation
 
 ## Overview
-This is the official C# implementation of the Circular Protocol Enterprise APIs for data certification. The repository provides tools for blockchain interaction, account management, and certificate handling.
+This is the official C# implementation of the Circular Protocol Enterprise APIs for data certification on blockchain. The repository provides an **async-only API** for blockchain interaction, account management, and certificate handling, aligned with the Rust reference implementation at version **1.0.13**.
 
 ## Key Features
-The library supports account management with blockchain interaction, certificate creation and submission capabilities, transaction tracking and verification, and secure digital signatures using ECDSA (secp256k1) with RFC 6979 compliant deterministic signatures.
+The library supports:
+- **Async-first API design** - all I/O operations use async/await patterns for optimal performance
+- **Account management** with blockchain interaction
+- **Certificate creation and submission** to Circular Protocol blockchain
+- **Transaction tracking and verification** with configurable polling
+- **Secure digital signatures** using ECDSA (secp256k1) with RFC 6979 compliant deterministic signatures
+- **DER signature encoding** matching Rust reference implementation
 
 ## Technical Requirements
-- .NET 6.0 or higher
+- **.NET 6.0 or higher** (targets .NET Standard 2.1)
 - NuGet package manager
+- **Testnet or mainnet credentials** for blockchain operations
 
 ## Dependencies
-The project relies on BouncyCastle.Cryptography for cryptographic operations (secp256k1), System.Text.Json for JSON processing, and System.Net.Http for network requests.
+The project relies on:
+- **BouncyCastle.Cryptography** - cryptographic operations (secp256k1 ECDSA)
+- **System.Text.Json** - JSON serialization/deserialization
+- **System.Net.Http** - asynchronous network requests
 
 ## Installation
 Install via NuGet Package Manager:
@@ -28,24 +38,43 @@ dotnet build
 
 ## Main API Classes
 
-**CEPAccount Class** provides core blockchain functionality including:
-- Opening accounts with `Open(string address)`
-- Closing accounts via `Close()`
-- Network configuration through `SetNetwork(string network)`
-- Blockchain identifier setting with `SetBlockchain(string chain)`
-- Data signing with `SignData(string data, string privateKeyHex)`
-- Account updates using `UpdateAccount()`
-- Certificate submission through `SubmitCertificate(string pdata, string privateKeyHex)`
-- Transaction retrieval with `GetTransaction(string blockID, string transactionID)`
-- Transaction outcome polling via `GetTransactionOutcome(string txID, int timeoutSec, int intervalSec)`
+### CEPAccount Class
+Core blockchain client providing async operations:
 
-**CCertificate Class** manages certificate operations:
-- Setting certificate data with `SetData(string data)`
-- Retrieving data via `GetData()`
-- JSON format export through `GetJSONCertificate()`
-- Size calculation with `GetCertificateSize()`
+**Synchronous Setup Methods:**
+- `Open(string address)` - Initialize account with blockchain address
+- `Close()` - Securely clear account data
+- `SetBlockchain(string chain)` - Set blockchain identifier
 
-**Properties:** The CCertificate class includes `PreviousTxID` and `PreviousBlock` properties for certificate chaining support.
+**Async I/O Operations** (all methods return Task):
+- `SetNetworkAsync(string network)` - Configure network (testnet/mainnet) with NAG discovery
+- `UpdateAccountAsync()` - Refresh account state and retrieve current nonce from blockchain
+- `SubmitCertificateAsync(string certificateJson, string privateKeyHex)` - Submit certificate to blockchain
+- `GetTransactionAsync(string blockID, string transactionID)` - Retrieve specific transaction details
+- `GetTransactionOutcomeAsync(string txID, int timeoutSec, int intervalSec)` - Poll for transaction confirmation
+
+**Key Properties:**
+- `Address` - Account blockchain address
+- `LatestTxID` - Most recent transaction ID
+- `Nonce` - Current transaction counter
+- `LastError` - Last error message (null if no error)
+- `NAGURL` - Network Access Gateway URL
+- `Blockchain` - Current blockchain identifier
+
+### CCertificate Class
+Certificate data structure and operations:
+
+**Methods:**
+- `SetData(string data)` - Set certificate data (automatically converts to hex)
+- `GetData()` - Retrieve original certificate data (converts from hex)
+- `GetJSONCertificate()` - Export certificate as JSON string
+- `GetCertificateSize()` - Calculate certificate size in bytes
+
+**Properties:**
+- `Data` - Certificate payload (hex-encoded)
+- `PreviousTxID` - Previous transaction ID for chaining
+- `PreviousBlock` - Previous block for chaining
+- `Version` - Certificate format version (currently 1.0.13)
 
 ## Usage Examples
 
@@ -55,24 +84,47 @@ See `examples/SimpleCertificateSubmission.cs` for a complete example of certific
 dotnet run --project examples
 ```
 
-Basic usage pattern:
+Basic usage pattern (async):
 
 ```csharp
 using CircularEnterpriseApis;
+using System.Threading.Tasks;
 
-// Create and configure account
-var account = new CEPAccount();
-account.Open("0xYourWalletAddress");
-account.SetNetwork("testnet");
-account.UpdateAccount();
+public async Task CertifyDataAsync()
+{
+    // Create and configure account
+    var account = new CEPAccount();
+    account.Open("0xYourWalletAddress");
+    account.SetBlockchain(Constants.DefaultChain);
 
-// Create and submit certificate
-var certificate = new CCertificate();
-certificate.SetData("Your data to certify");
-account.SubmitCertificate(certificate.GetJSONCertificate(), "your_private_key_hex");
+    // Set network and update account (async operations)
+    await account.SetNetworkAsync("testnet");
+    await account.UpdateAccountAsync();
 
-// Get transaction outcome
-var outcome = account.GetTransactionOutcome(account.LatestTxID, 30, 5);
+    // Create and submit certificate
+    var certificate = new CCertificate();
+    certificate.SetData("Your data to certify");
+    await account.SubmitCertificateAsync(
+        certificate.GetJSONCertificate(),
+        "your_private_key_hex"
+    );
+
+    // Poll for transaction outcome (30 second timeout, 2 second intervals)
+    var outcome = await account.GetTransactionOutcomeAsync(
+        account.LatestTxID,
+        timeoutSec: 30,
+        intervalSec: 2
+    );
+
+    if (outcome != null)
+    {
+        Console.WriteLine($"Transaction confirmed: {outcome["Status"]}");
+    }
+    else
+    {
+        Console.WriteLine($"Error: {account.LastError}");
+    }
+}
 ```
 
 ## Testing Setup

@@ -49,7 +49,7 @@ namespace CircularEnterpriseApis.Examples
 
                 // Set network (use testnet by default)
                 Console.WriteLine("🌐 Setting network to testnet...");
-                string nagUrl = account.SetNetwork("testnet");
+                string nagUrl = await account.SetNetworkAsync("testnet");
                 Console.WriteLine($"📡 NAG URL: {nagUrl}");
 
                 if (!string.IsNullOrEmpty(account.LastError))
@@ -59,7 +59,7 @@ namespace CircularEnterpriseApis.Examples
 
                 // Update account information
                 Console.WriteLine("🔄 Updating account information...");
-                bool updated = account.UpdateAccount();
+                bool updated = await account.UpdateAccountAsync();
                 if (updated)
                 {
                     Console.WriteLine($"✅ Account updated. Current nonce: {account.Nonce}");
@@ -83,7 +83,7 @@ namespace CircularEnterpriseApis.Examples
                 // Submit certificate to blockchain
                 Console.WriteLine();
                 Console.WriteLine("🚀 Submitting certificate to blockchain...");
-                account.SubmitCertificate(certificateJson, privateKey);
+                await account.SubmitCertificateAsync(certificateJson, privateKey);
 
                 if (!string.IsNullOrEmpty(account.LastError))
                 {
@@ -100,7 +100,7 @@ namespace CircularEnterpriseApis.Examples
                 Console.WriteLine("⏳ Waiting for transaction confirmation...");
                 Console.WriteLine("(This may take up to 30 seconds)");
 
-                var outcome = account.GetTransactionOutcome(txId, 30, 5);
+                var outcome = await account.GetTransactionOutcomeAsync(txId, 30, 2);
                 if (outcome != null)
                 {
                     Console.WriteLine("🎉 Transaction confirmed!");
@@ -144,8 +144,8 @@ namespace CircularEnterpriseApis.Examples
 
                 var account = new CEPAccount();
                 account.Open(address);
-                account.SetNetwork("testnet");
-                account.UpdateAccount();
+                await account.SetNetworkAsync("testnet");
+                await account.UpdateAccountAsync();
 
                 Console.WriteLine($"🔗 Starting chain submission with nonce: {account.Nonce}");
 
@@ -164,7 +164,7 @@ namespace CircularEnterpriseApis.Examples
                     }
 
                     Console.WriteLine($"🚀 Submitting certificate {i}...");
-                    account.SubmitCertificate(cert.GetJSONCertificate(), privateKey);
+                    await account.SubmitCertificateAsync(cert.GetJSONCertificate(), privateKey);
 
                     if (!string.IsNullOrEmpty(account.LastError))
                     {
