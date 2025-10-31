@@ -6,34 +6,63 @@ using System.Threading.Tasks;
 namespace CircularEnterpriseApis
 {
     /// <summary>
-    /// Package-level constants matching Go exactly
-    /// Maps to Go package-level: const LibVersion = "1.0.13"
-    /// Enables direct access: LibVersion (instead of Common.LibVersion)
+    /// Constants used throughout the Circular Enterprise APIs.
+    /// These values are used for blockchain identification, network discovery, and versioning.
     /// </summary>
     public static class Constants
     {
-        // Package-level constants - exact values from Go implementation
+        /// <summary>
+        /// The current version of the Circular Enterprise APIs library.
+        /// This version is sent with all blockchain requests for compatibility tracking.
+        /// </summary>
         public const string LibVersion = "1.0.13";
+
+        /// <summary>
+        /// The default blockchain identifier for Circular Protocol operations.
+        /// This is the hex-encoded blockchain ID used unless a different blockchain is specified.
+        /// </summary>
         public const string DefaultChain = "0x8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2";
+
+        /// <summary>
+        /// The default Network Access Gateway (NAG) URL for blockchain communication.
+        /// This URL serves as the entry point for blockchain operations.
+        /// </summary>
         public const string DefaultNAG = "https://nag.circularlabs.io/NAG.php?cep=";
 
-        // Mutable like Go (var NetworkURL)
+        /// <summary>
+        /// The base URL for network discovery and NAG resolution.
+        /// Used to dynamically discover the correct NAG URL for different networks (testnet, mainnet, devnet).
+        /// </summary>
         public static string NetworkURL = "https://circularlabs.io/network/getNAG?network=";
     }
 
     /// <summary>
-    /// Common functions and configuration matching the Go implementation
-    /// Maps to Go: pkg/common.go
+    /// Internal common functions for network discovery and configuration.
+    /// Most functionality is exposed through the <see cref="CircularEnterpriseApis"/> class.
     /// </summary>
     public static class Common
     {
-        // Re-expose constants for backward compatibility - will be removed in future version
+        /// <summary>
+        /// Deprecated: Use Constants.LibVersion instead.
+        /// </summary>
         [Obsolete("Use Constants.LibVersion instead")]
         public const string LibVersion = Constants.LibVersion;
+
+        /// <summary>
+        /// Deprecated: Use Constants.DefaultChain instead.
+        /// </summary>
         [Obsolete("Use Constants.DefaultChain instead")]
         public const string DefaultChain = Constants.DefaultChain;
+
+        /// <summary>
+        /// Deprecated: Use Constants.DefaultNAG instead.
+        /// </summary>
         [Obsolete("Use Constants.DefaultNAG instead")]
         public const string DefaultNAG = Constants.DefaultNAG;
+
+        /// <summary>
+        /// Deprecated: Use Constants.NetworkURL instead.
+        /// </summary>
         [Obsolete("Use Constants.NetworkURL instead")]
         public static string NetworkURL = Constants.NetworkURL;
 
@@ -42,12 +71,16 @@ namespace CircularEnterpriseApis
             Timeout = TimeSpan.FromSeconds(30)
         };
 
-
         /// <summary>
-        /// Async NAG discovery function - matches Rust async fn get_nag
-        /// Maps to Rust: pub async fn get_nag(network: &str) -> Result<String, String>
-        /// Returns (url, error) tuple instead of throwing exceptions
+        /// Discovers the Network Access Gateway (NAG) URL for a specified blockchain network.
+        /// This function queries the Circular Protocol network discovery service.
         /// </summary>
+        /// <param name="network">The network identifier ("testnet", "mainnet", or "devnet")</param>
+        /// <returns>
+        /// A tuple containing the NAG URL and error message.
+        /// On success: (url: "https://...", error: null)
+        /// On failure: (url: "", error: "descriptive error message")
+        /// </returns>
         public static async Task<(string url, string? error)> GetNAGAsync(string network)
         {
             if (string.IsNullOrEmpty(network))
@@ -56,7 +89,6 @@ namespace CircularEnterpriseApis
             try
             {
                 string url = Constants.NetworkURL + network;
-                // Async HTTP call - matches Rust async implementation
                 HttpResponseMessage httpResponse = await httpClient.GetAsync(url);
 
                 if (!httpResponse.IsSuccessStatusCode)
@@ -66,10 +98,10 @@ namespace CircularEnterpriseApis
 
                 string response = await httpResponse.Content.ReadAsStringAsync();
 
-                // Parse JSON response to extract NAG URL - matches Go implementation exactly
+                // Parse JSON response to extract NAG URL
                 using (JsonDocument doc = JsonDocument.Parse(response))
                 {
-                    // Handle Go's expected response format: {"status":"success", "url":"...", "message":"OK"}
+                    // Handle standard response format: {"status":"success", "url":"...", "message":"OK"}
                     if (doc.RootElement.TryGetProperty("status", out JsonElement statusElement))
                     {
                         string status = statusElement.GetString() ?? "";
@@ -122,6 +154,5 @@ namespace CircularEnterpriseApis
                 return ("", $"failed to fetch NAG URL: {ex.Message}");
             }
         }
-
     }
 }

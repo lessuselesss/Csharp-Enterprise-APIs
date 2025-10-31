@@ -4,16 +4,16 @@ using System.Text;
 namespace CircularEnterpriseApis
 {
     /// <summary>
-    /// Utility functions that match Go package-level functions exactly
-    /// Moved to root namespace for direct access like Go: StringToHex("test")
+    /// Internal utility functions for string encoding, hex conversion, and timestamp formatting.
+    /// These utilities are exposed through the <see cref="CircularEnterpriseApis"/> class for public access.
     /// </summary>
     public static class Utils
     {
         /// <summary>
-        /// Converts a string to its hexadecimal representation
-        /// Matches Go: func StringToHex(s string) string
-        /// Returns UPPERCASE hex to match Go exactly
+        /// Converts a UTF-8 string to its hexadecimal representation (uppercase).
         /// </summary>
+        /// <param name="s">The string to convert</param>
+        /// <returns>Uppercase hexadecimal string without separators, or empty string if input is null/empty</returns>
         public static string StringToHex(string s)
         {
             if (string.IsNullOrEmpty(s))
@@ -24,9 +24,12 @@ namespace CircularEnterpriseApis
         }
 
         /// <summary>
-        /// Converts a hexadecimal string back to its original string representation
-        /// Matches Go: func HexToString(hexStr string) string
+        /// Converts a hexadecimal string back to its original UTF-8 string representation.
+        /// Handles hex strings with or without "0x" prefix.
+        /// Returns empty string if the hex string has odd length or contains invalid characters.
         /// </summary>
+        /// <param name="hexStr">The hexadecimal string to convert</param>
+        /// <returns>Decoded UTF-8 string, or empty string on error</returns>
         public static string HexToString(string hexStr)
         {
             if (string.IsNullOrEmpty(hexStr))
@@ -60,9 +63,11 @@ namespace CircularEnterpriseApis
         }
 
         /// <summary>
-        /// Fixes and normalizes a hex string by removing prefixes and ensuring lowercase
-        /// Matches Go: func HexFix(hexStr string) string exactly
+        /// Normalizes a hexadecimal string for blockchain operations.
+        /// Removes "0x" prefix, converts to lowercase, and pads with a leading zero if length is odd.
         /// </summary>
+        /// <param name="hexStr">The hexadecimal string to normalize</param>
+        /// <returns>Normalized hex string (lowercase, no prefix, even length)</returns>
         public static string HexFix(string hexStr)
         {
             if (string.IsNullOrEmpty(hexStr))
@@ -72,10 +77,10 @@ namespace CircularEnterpriseApis
             if (hexStr.StartsWith("0x") || hexStr.StartsWith("0X"))
                 hexStr = hexStr.Substring(2);
 
-            // Convert to lowercase for consistency (matches Go implementation)
+            // Convert to lowercase for consistency
             hexStr = hexStr.ToLowerInvariant();
 
-            // Pad with '0' if length is odd (matches Go exactly)
+            // Pad with '0' if length is odd
             if (hexStr.Length % 2 != 0)
                 hexStr = "0" + hexStr;
 
@@ -83,10 +88,11 @@ namespace CircularEnterpriseApis
         }
 
         /// <summary>
-        /// Pads a number to ensure it's at least 2 digits with leading zeros
-        /// Matches Go: func PadNumber(num int) string
-        /// EXACTLY matches Go behavior: only pads single positive digits
+        /// Pads a number with a leading zero if it's a single digit (0-9).
+        /// Numbers outside this range are returned as-is.
         /// </summary>
+        /// <param name="num">The number to pad</param>
+        /// <returns>String with leading zero for single positive digits, unchanged otherwise</returns>
         public static string PadNumber(int num)
         {
             if (num >= 0 && num < 10)
@@ -97,10 +103,10 @@ namespace CircularEnterpriseApis
         }
 
         /// <summary>
-        /// Gets the current timestamp in the format used by Circular Protocol
-        /// Matches Go: func GetFormattedTimestamp() string
-        /// Format: YYYY:MM:DD-HH:MM:SS
+        /// Gets the current UTC timestamp in Circular Protocol format.
+        /// Format: YYYY:MM:DD-HH:MM:SS (uses colons for date separators, not dashes)
         /// </summary>
+        /// <returns>Formatted timestamp string for blockchain transactions</returns>
         public static string GetFormattedTimestamp()
         {
             var now = DateTime.UtcNow;
