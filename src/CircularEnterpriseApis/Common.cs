@@ -42,90 +42,6 @@ namespace CircularEnterpriseApis
             Timeout = TimeSpan.FromSeconds(30)
         };
 
-        /// <summary>
-        /// NAG discovery function - matches Go GetNAG function exactly
-        /// Maps to Go: func GetNAG(network string) (string, error)
-        /// Returns (url, error) tuple instead of throwing exceptions
-        /// </summary>
-        [Obsolete("Use GetNAGAsync() instead. Synchronous methods will be removed in v2.0.0.", false)]
-        public static (string url, string? error) GetNAGInternal(string network)
-        {
-            if (string.IsNullOrEmpty(network))
-                return ("", "network identifier cannot be empty");
-
-            try
-            {
-                string url = Constants.NetworkURL + network;
-                // Use synchronous call to match Go exactly
-                HttpResponseMessage httpResponse = httpClient.GetAsync(url).Result;
-
-                if (!httpResponse.IsSuccessStatusCode)
-                {
-                    return ("", $"network discovery failed with status: {httpResponse.StatusCode}");
-                }
-
-                string response = httpResponse.Content.ReadAsStringAsync().Result;
-
-                // Parse JSON response to extract NAG URL - matches Go implementation exactly
-                using (JsonDocument doc = JsonDocument.Parse(response))
-                {
-                    // Handle Go's expected response format: {"status":"success", "url":"...", "message":"OK"}
-                    if (doc.RootElement.TryGetProperty("status", out JsonElement statusElement))
-                    {
-                        string status = statusElement.GetString() ?? "";
-
-                        if (status == "error")
-                        {
-                            string message = "";
-                            if (doc.RootElement.TryGetProperty("message", out JsonElement messageElement))
-                            {
-                                message = messageElement.GetString() ?? "";
-                            }
-                            return ("", $"failed to get valid NAG URL from response: {message}");
-                        }
-
-                        if (status == "success" && doc.RootElement.TryGetProperty("url", out JsonElement urlElement))
-                        {
-                            string? nagUrl = urlElement.GetString();
-                            if (!string.IsNullOrEmpty(nagUrl))
-                                return (nagUrl, null);
-                        }
-                    }
-
-                    // Try alternative format for backward compatibility
-                    if (doc.RootElement.TryGetProperty("Result", out JsonElement resultElement) &&
-                        resultElement.GetInt32() == 200 &&
-                        doc.RootElement.TryGetProperty("Response", out JsonElement responseElement))
-                    {
-                        // Handle both "nagurl" and "url" field names
-                        JsonElement urlElement;
-                        bool foundUrl = responseElement.TryGetProperty("nagurl", out urlElement) ||
-                                       responseElement.TryGetProperty("url", out urlElement);
-
-                        if (foundUrl)
-                        {
-                            string? nagUrl = urlElement.GetString();
-                            if (!string.IsNullOrEmpty(nagUrl))
-                                return (nagUrl, null);
-                        }
-                    }
-                }
-
-                return ("", "failed to get valid NAG URL from response");
-            }
-            catch (JsonException ex)
-            {
-                return ("", $"failed to unmarshal NAG response: {ex.Message}");
-            }
-            catch (HttpRequestException ex)
-            {
-                return ("", $"failed to fetch NAG URL: {ex.Message}");
-            }
-            catch (AggregateException ex) when (ex.InnerException is HttpRequestException)
-            {
-                return ("", $"failed to fetch NAG URL: {ex.InnerException.Message}");
-            }
-        }
 
         /// <summary>
         /// Async NAG discovery function - matches Rust async fn get_nag
@@ -207,17 +123,5 @@ namespace CircularEnterpriseApis
             }
         }
 
-        /// <summary>
-        /// Legacy wrapper that throws exceptions - DEPRECATED
-        /// Use GetNAGAsync for async operations
-        /// </summary>
-        [Obsolete("Use GetNAGAsync() instead. Synchronous methods will be removed in v2.0.0.", false)]
-        public static string GetNAG(string network)
-        {
-            var (url, error) = GetNAGInternal(network);
-            if (error != null)
-                throw new InvalidOperationException(error);
-            return url;
-        }
     }
 }
