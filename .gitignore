@@ -351,3 +351,6 @@ FodyWeavers.xsd
 
 # Environment files
 .env
+
+# Repomix generated files
+*repomix.xml
