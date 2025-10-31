@@ -9,48 +9,91 @@ using CircularEnterpriseApis.Crypto;
 namespace CircularEnterpriseApis
 {
     /// <summary>
-    /// Main client interface for blockchain operations
-    /// Maps to Go: CEPAccount struct in pkg/account.go
-    /// EXACTLY matches Go API surface for compatibility
+    /// Primary client for interacting with the Circular Protocol blockchain.
+    /// Provides methods for account management, certificate submission, and transaction tracking.
     /// </summary>
+    /// <example>
+    /// Basic usage:
+    /// <code>
+    /// var account = new CEPAccount();
+    /// account.Open("0xYourWalletAddress");
+    /// await account.SetNetworkAsync("testnet");
+    /// await account.UpdateAccountAsync();
+    ///
+    /// var cert = new CCertificate();
+    /// cert.SetData("Your data to certify");
+    /// await account.SubmitCertificateAsync(cert.GetJSONCertificate(), "your_private_key");
+    /// </code>
+    /// </example>
     public class CEPAccount
     {
-        #region Properties - exact same names as Go struct fields
+        #region Properties
 
-        /// <summary>Account address (hex format) - Maps to Go: Address string</summary>
+        /// <summary>
+        /// The blockchain address associated with this account (hex format with optional 0x prefix).
+        /// Set this by calling <see cref="Open(string)"/>.
+        /// </summary>
         public string Address { get; set; } = "";
 
-        /// <summary>Public key (hex format) - Maps to Go: PublicKey string</summary>
+        /// <summary>
+        /// The public key associated with this account (hex format).
+        /// </summary>
         public string PublicKey { get; set; } = "";
 
-        /// <summary>Account information object - Maps to Go: Info interface{}</summary>
+        /// <summary>
+        /// Additional account information returned from blockchain queries.
+        /// </summary>
         public object? Info { get; set; }
 
-        /// <summary>Code version identifier - Maps to Go: CodeVersion string</summary>
+        /// <summary>
+        /// The library version identifier used in blockchain requests.
+        /// </summary>
         public string CodeVersion { get; set; } = Constants.LibVersion;
 
-        /// <summary>Last error message - Maps to Go: LastError string (nullable for clarity)</summary>
+        /// <summary>
+        /// Contains the last error message if an operation failed, or null if the last operation succeeded.
+        /// Always check this property after operations that return void or bool to determine if errors occurred.
+        /// </summary>
         public string? LastError { get; set; } = null;
 
-        /// <summary>NAG URL for network communication - Maps to Go: NAGURL string</summary>
+        /// <summary>
+        /// The Network Access Gateway (NAG) URL used for blockchain communication.
+        /// Automatically set by <see cref="SetNetworkAsync(string)"/>.
+        /// </summary>
         public string NAGURL { get; set; } = Constants.DefaultNAG;
 
-        /// <summary>Network node identifier - Maps to Go: NetworkNode string</summary>
+        /// <summary>
+        /// The network identifier (testnet, mainnet, devnet) currently in use.
+        /// Automatically set by <see cref="SetNetworkAsync(string)"/>.
+        /// </summary>
         public string NetworkNode { get; set; } = "";
 
-        /// <summary>Blockchain identifier (hex format) - Maps to Go: Blockchain string</summary>
+        /// <summary>
+        /// The blockchain identifier (hex format) for the specific blockchain network.
+        /// Set this using <see cref="SetBlockchain(string)"/> or use the default.
+        /// </summary>
         public string Blockchain { get; set; } = Constants.DefaultChain;
 
-        /// <summary>Latest transaction ID - Maps to Go: LatestTxID string</summary>
+        /// <summary>
+        /// The transaction ID of the most recently submitted certificate.
+        /// Use this to track transaction status with <see cref="GetTransactionOutcomeAsync(string, int, int)"/>.
+        /// </summary>
         public string LatestTxID { get; set; } = "";
 
-        /// <summary>Current nonce for transaction ordering - Maps to Go: Nonce int64</summary>
+        /// <summary>
+        /// The current transaction nonce for this account.
+        /// Updated automatically by <see cref="UpdateAccountAsync"/> and <see cref="SubmitCertificateAsync(string, string)"/>.
+        /// </summary>
         public long Nonce { get; set; }
 
-        /// <summary>Interval in seconds for polling operations - Maps to Go: IntervalSec int</summary>
-        public int IntervalSec { get; set; } = 2;  // Matches Rust default
+        /// <summary>
+        /// Default polling interval in seconds for transaction outcome checks. Default is 2 seconds.
+        /// </summary>
+        public int IntervalSec { get; set; } = 2;
 
-        /// <summary>Network URL for NAG discovery - Maps to Go: NetworkURL string</summary>
+        /// <summary>
+        /// The base URL for network discovery and NAG resolution.
+        /// </summary>
         public string NetworkURL { get; set; } = Constants.NetworkURL;
 
         #endregion
@@ -67,8 +110,8 @@ namespace CircularEnterpriseApis
         #region Constructor
 
         /// <summary>
-        /// Creates a new CEPAccount instance
-        /// Matches Node.js/PHP/Java: new CEPAccount()
+        /// Creates a new CEPAccount instance with default configuration.
+        /// After creating, call <see cref="Open(string)"/> to initialize with your blockchain address.
         /// </summary>
         public CEPAccount()
         {
@@ -80,9 +123,20 @@ namespace CircularEnterpriseApis
         #region Public Methods
 
         /// <summary>
-        /// Initializes the CEPAccount with a specified blockchain address
-        /// Matches Node.js/PHP/Java: open(address)
+        /// Initializes the account with a blockchain address.
+        /// This must be called before performing any blockchain operations.
         /// </summary>
+        /// <param name="address">Your wallet address in hex format (with or without 0x prefix)</param>
+        /// <returns>True if the address was successfully set, false if the address is invalid</returns>
+        /// <example>
+        /// <code>
+        /// var account = new CEPAccount();
+        /// if (!account.Open("0x1234567890abcdef..."))
+        /// {
+        ///     Console.WriteLine($"Error: {account.LastError}");
+        /// }
+        /// </code>
+        /// </example>
         public bool Open(string address)
         {
             if (string.IsNullOrEmpty(address))
@@ -97,8 +151,8 @@ namespace CircularEnterpriseApis
         }
 
         /// <summary>
-        /// Securely clears all sensitive and operational data
-        /// Maps to Go: func (a *CEPAccount) Close()
+        /// Clears all account data and resets the instance to its initial state.
+        /// Use this when you're done with an account or want to start fresh.
         /// </summary>
         public void Close()
         {
@@ -115,30 +169,27 @@ namespace CircularEnterpriseApis
         }
 
         /// <summary>
-        /// Gets the last error message if any
-        /// Matches Rust: get_last_error(&self) -> Option<String>
-        /// Returns null if no error (matches Rust Option::None)
+        /// Retrieves the last error message if any operation failed.
         /// </summary>
-        /// <returns>Error message or null if no error</returns>
+        /// <returns>The error message string, or null if no error occurred</returns>
         public string? GetLastError()
         {
             return string.IsNullOrEmpty(LastError) ? null : LastError;
         }
 
-
         /// <summary>
-        /// Explicitly sets the blockchain identifier
-        /// Matches Node.js/PHP/Java: setBlockchain(chain)
+        /// Sets the blockchain identifier for transactions.
+        /// Use this to target a specific blockchain network.
         /// </summary>
+        /// <param name="chain">The blockchain identifier in hex format</param>
         public void SetBlockchain(string chain)
         {
             Blockchain = chain;
         }
 
         /// <summary>
-        /// Signs data using the provided private key
-        /// INTERNAL: Not part of public API - matches Rust/Go reference implementations
-        /// Signing is an internal operation used by SubmitCertificate
+        /// Signs data using the provided private key (internal use only).
+        /// This method is used internally by SubmitCertificateAsync and should not be called directly.
         /// </summary>
         /// <param name="data">Data to sign</param>
         /// <param name="privateKeyHex">Private key in hex format</param>
@@ -169,21 +220,28 @@ namespace CircularEnterpriseApis
             }
         }
 
-
-
-
-
         #endregion
 
         #region Async Methods
 
         /// <summary>
-        /// Asynchronously configures the CEPAccount to operate on a specific blockchain network
-        /// Matches Rust: pub async fn set_network(&mut self, network: &str) -> String
+        /// Configures the account to use a specific blockchain network.
+        /// This discovers and sets the appropriate Network Access Gateway (NAG) URL for the network.
         /// </summary>
+        /// <param name="network">Network identifier: "testnet", "mainnet", or "devnet"</param>
+        /// <returns>The NAG URL on success, or empty string on failure (check <see cref="LastError"/>)</returns>
+        /// <example>
+        /// <code>
+        /// var nagUrl = await account.SetNetworkAsync("testnet");
+        /// if (string.IsNullOrEmpty(nagUrl))
+        /// {
+        ///     Console.WriteLine($"Network setup failed: {account.LastError}");
+        /// }
+        /// </code>
+        /// </example>
         public async Task<string> SetNetworkAsync(string network)
         {
-            // Use async GetNAG with Go-style error handling
+            // Use async GetNAG for network discovery
             var (url, error) = await CircularEnterpriseApis.GetNAGAsync(network);
             if (error != null)
             {
@@ -191,7 +249,6 @@ namespace CircularEnterpriseApis
                 return "";
             }
 
-            // Only set properties on SUCCESS (matches Go exactly)
             NAGURL = url;
             NetworkNode = network;
             LastError = null;
@@ -200,9 +257,21 @@ namespace CircularEnterpriseApis
         }
 
         /// <summary>
-        /// Asynchronously updates account information by retrieving the current nonce
-        /// Matches Rust: pub async fn update_account(&mut self) -> bool
+        /// Retrieves the current nonce from the blockchain for this account.
+        /// Must be called before submitting certificates to ensure the correct transaction sequence.
+        /// The nonce is automatically incremented after successful certificate submission.
         /// </summary>
+        /// <returns>True if the account was updated successfully, false otherwise (check <see cref="LastError"/>)</returns>
+        /// <example>
+        /// <code>
+        /// if (!await account.UpdateAccountAsync())
+        /// {
+        ///     Console.WriteLine($"Update failed: {account.LastError}");
+        ///     return;
+        /// }
+        /// Console.WriteLine($"Current nonce: {account.Nonce}");
+        /// </code>
+        /// </example>
         public async Task<bool> UpdateAccountAsync()
         {
             try
@@ -221,7 +290,7 @@ namespace CircularEnterpriseApis
                     return false;
                 }
 
-                // Build request URL - matches Go implementation exactly
+                // Build request URL
                 string url = NAGURL + "Circular_GetWalletNonce_";
                 if (!string.IsNullOrEmpty(NetworkNode))
                 {
@@ -230,15 +299,14 @@ namespace CircularEnterpriseApis
 
                 var requestData = new
                 {
-                    Blockchain = CircularEnterpriseApis.HexFix(Blockchain), // Remove 0x prefix
-                    Address = CircularEnterpriseApis.HexFix(Address),       // Remove 0x prefix
+                    Blockchain = CircularEnterpriseApis.HexFix(Blockchain),
+                    Address = CircularEnterpriseApis.HexFix(Address),
                     Version = CodeVersion
                 };
 
                 string jsonRequest = JsonSerializer.Serialize(requestData);
                 var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
-                // Use async HTTP call
                 HttpResponseMessage response = await httpClient.PostAsync(url, content);
                 string responseContent = await response.Content.ReadAsStringAsync();
 
@@ -250,23 +318,21 @@ namespace CircularEnterpriseApis
 
                         if (resultCode == 200 && doc.RootElement.TryGetProperty("Response", out JsonElement responseElement))
                         {
-                            // Handle both "Nonce" and "nonce" field variations (Go vs other implementations)
                             JsonElement nonceElement;
                             bool foundNonce = responseElement.TryGetProperty("Nonce", out nonceElement) ||
                                             responseElement.TryGetProperty("nonce", out nonceElement);
 
                             if (foundNonce)
                             {
-                                // Handle both int and string nonce values
                                 if (nonceElement.ValueKind == JsonValueKind.Number)
                                 {
-                                    Nonce = nonceElement.GetInt64() + 1; // Increment like Go implementation
+                                    Nonce = nonceElement.GetInt64() + 1;
                                 }
                                 else if (nonceElement.ValueKind == JsonValueKind.String)
                                 {
                                     if (long.TryParse(nonceElement.GetString(), out long nonceValue))
                                     {
-                                        Nonce = nonceValue + 1; // Increment like Go implementation
+                                        Nonce = nonceValue + 1;
                                     }
                                     else
                                     {
@@ -323,9 +389,35 @@ namespace CircularEnterpriseApis
         }
 
         /// <summary>
-        /// Asynchronously submits a certificate to the blockchain
-        /// Matches Rust: pub async fn submit_certificate(&mut self, pdata: &str, private_key_hex: &str)
+        /// Submits a certificate to the blockchain for permanent storage.
+        /// Ensure you call <see cref="UpdateAccountAsync"/> before submitting to get the latest nonce.
+        /// On success, the transaction ID is stored in <see cref="LatestTxID"/>.
         /// </summary>
+        /// <param name="pdata">Certificate data (typically JSON from <see cref="CCertificate.GetJSONCertificate"/>)</param>
+        /// <param name="privateKeyHex">Your private key in hex format (with or without 0x prefix)</param>
+        /// <returns>A Task that completes when the submission finishes (check <see cref="LastError"/> for errors)</returns>
+        /// <example>
+        /// <code>
+        /// await account.UpdateAccountAsync();
+        ///
+        /// var cert = new CCertificate();
+        /// cert.SetData("Document hash: abc123...");
+        ///
+        /// await account.SubmitCertificateAsync(
+        ///     cert.GetJSONCertificate(),
+        ///     "0x1234567890abcdef..."
+        /// );
+        ///
+        /// if (!string.IsNullOrEmpty(account.LastError))
+        /// {
+        ///     Console.WriteLine($"Submission failed: {account.LastError}");
+        /// }
+        /// else
+        /// {
+        ///     Console.WriteLine($"Certificate submitted! TX ID: {account.LatestTxID}");
+        /// }
+        /// </code>
+        /// </example>
         public async Task SubmitCertificateAsync(string pdata, string privateKeyHex)
         {
             try
@@ -350,15 +442,12 @@ namespace CircularEnterpriseApis
                     return;
                 }
 
-                // Note: Manual UpdateAccount() call required before SubmitCertificate (matches Go behavior)
-                // User must call UpdateAccount() explicitly to get the latest nonce
-
                 // Prepare transaction data
                 string timestamp = CircularEnterpriseApis.GetFormattedTimestamp();
-                string fromHex = CircularEnterpriseApis.HexFix(Address);    // Remove 0x prefix for hash calc
-                string toHex = CircularEnterpriseApis.HexFix(Address);      // Self-send for certificate
+                string fromHex = CircularEnterpriseApis.HexFix(Address);
+                string toHex = CircularEnterpriseApis.HexFix(Address);
 
-                // Create payload object with Action and Data wrapper (matches Go implementation)
+                // Create payload with Action and Data wrapper
                 var payloadObject = new
                 {
                     Action = "CP_CERTIFICATE",
@@ -369,7 +458,7 @@ namespace CircularEnterpriseApis
 
                 string blockchainHex = CircularEnterpriseApis.HexFix(Blockchain);
 
-                // Calculate transaction ID (matches Go implementation - no "0x" prefix)
+                // Calculate transaction ID
                 string txDataForId = blockchainHex + fromHex + toHex + payloadHex + Nonce.ToString() + timestamp;
                 LatestTxID = CryptoUtils.Sha256Hex(txDataForId);
 
@@ -379,20 +468,19 @@ namespace CircularEnterpriseApis
                 // Create signature
                 string signature = CryptoUtils.SignMessage(privateKeyHex, LatestTxID);
 
-                // Create transaction payload matching Go implementation exactly
+                // Create transaction payload
                 var transaction = new
                 {
-                    ID = LatestTxID,                    // No 0x prefix (matches Go)
-                    From = fromHex,                     // No 0x prefix
-                    To = toHex,                         // No 0x prefix
-                    Timestamp = timestamp,              // YYYY:MM:DD-hh:mm:ss format
-                    Payload = payloadHex,               // No 0x prefix
-                    Nonce = Nonce.ToString(),           // STRING format (matches Go)
-                    Signature = signature,              // No 0x prefix
-                    Blockchain = blockchainHex,         // No 0x prefix
-                    Type = "C_TYPE_CERTIFICATE",       // Transaction type
-                    Version = Constants.LibVersion     // Code version
-                    // REMOVED: PublicKey field (not in Go implementation)
+                    ID = LatestTxID,
+                    From = fromHex,
+                    To = toHex,
+                    Timestamp = timestamp,
+                    Payload = payloadHex,
+                    Nonce = Nonce.ToString(),
+                    Signature = signature,
+                    Blockchain = blockchainHex,
+                    Type = "C_TYPE_CERTIFICATE",
+                    Version = Constants.LibVersion
                 };
 
                 string jsonRequest = JsonSerializer.Serialize(transaction);
@@ -403,7 +491,6 @@ namespace CircularEnterpriseApis
                     url += NetworkNode;
                 }
 
-                // Use async HTTP call
                 HttpResponseMessage response = await httpClient.PostAsync(url, content);
                 string responseContent = await response.Content.ReadAsStringAsync();
 
@@ -443,9 +530,14 @@ namespace CircularEnterpriseApis
         }
 
         /// <summary>
-        /// Asynchronously retrieves a specific transaction by its block ID and transaction ID
-        /// Matches Rust: pub async fn get_transaction(&self, block_id: &str, transaction_id: &str) -> Option<Value>
+        /// Retrieves details of a specific transaction from the blockchain.
         /// </summary>
+        /// <param name="blockID">The block number containing the transaction</param>
+        /// <param name="transactionID">The transaction ID (hash) to retrieve</param>
+        /// <returns>
+        /// A dictionary containing transaction details on success, or null on failure (check <see cref="LastError"/>).
+        /// The dictionary structure matches the blockchain's transaction format.
+        /// </returns>
         public async Task<Dictionary<string, object>?> GetTransactionAsync(string blockID, string transactionID)
         {
             try
@@ -462,14 +554,12 @@ namespace CircularEnterpriseApis
                     return null;
                 }
 
-                // Parse blockID to long for range search (matches Go implementation exactly)
                 if (!long.TryParse(blockID, out long startBlock))
                 {
                     LastError = "invalid blockID format";
                     return null;
                 }
 
-                // Call internal async method with single block range
                 return await GetTransactionByIDAsync(transactionID, startBlock, startBlock);
             }
             catch (Exception ex)
@@ -480,8 +570,7 @@ namespace CircularEnterpriseApis
         }
 
         /// <summary>
-        /// Internal async method to retrieve transaction by ID within a block range
-        /// Maps to Rust async implementation
+        /// Internal method to retrieve transaction by ID within a block range.
         /// </summary>
         private async Task<Dictionary<string, object>?> GetTransactionByIDAsync(string transactionID, long startBlock, long endBlock)
         {
@@ -511,7 +600,6 @@ namespace CircularEnterpriseApis
                     url += NetworkNode;
                 }
 
-                // Use async HTTP call
                 HttpResponseMessage response = await httpClient.PostAsync(url, content);
                 string responseContent = await response.Content.ReadAsStringAsync();
 
@@ -523,7 +611,6 @@ namespace CircularEnterpriseApis
 
                 using (JsonDocument doc = JsonDocument.Parse(responseContent))
                 {
-                    // Return the raw transaction details as Dictionary (matches Go behavior)
                     var result = JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent);
                     LastError = null;
                     return result;
@@ -537,9 +624,36 @@ namespace CircularEnterpriseApis
         }
 
         /// <summary>
-        /// Asynchronously polls for transaction outcome until found or timeout
-        /// Matches Rust: pub async fn get_transaction_outcome(&mut self, tx_id: &str, timeout_sec: u64, interval_sec: u64) -> Option<Value>
+        /// Polls the blockchain for transaction confirmation until the transaction is finalized or the timeout is reached.
+        /// This is useful after submitting a certificate to wait for blockchain confirmation.
         /// </summary>
+        /// <param name="txID">The transaction ID to monitor (typically from <see cref="LatestTxID"/>)</param>
+        /// <param name="timeoutSec">Maximum time to wait in seconds before giving up</param>
+        /// <param name="intervalSec">Time between polling attempts in seconds</param>
+        /// <returns>
+        /// A dictionary containing the final transaction outcome on success, or null if timeout is reached or an error occurs.
+        /// Check <see cref="LastError"/> if null is returned.
+        /// </returns>
+        /// <example>
+        /// <code>
+        /// await account.SubmitCertificateAsync(certJson, privateKey);
+        ///
+        /// var outcome = await account.GetTransactionOutcomeAsync(
+        ///     account.LatestTxID,
+        ///     timeoutSec: 30,
+        ///     intervalSec: 2
+        /// );
+        ///
+        /// if (outcome != null)
+        /// {
+        ///     Console.WriteLine($"Transaction confirmed: {outcome["Status"]}");
+        /// }
+        /// else
+        /// {
+        ///     Console.WriteLine($"Timeout or error: {account.LastError}");
+        /// }
+        /// </code>
+        /// </example>
         public async Task<Dictionary<string, object>?> GetTransactionOutcomeAsync(string txID, int timeoutSec, int intervalSec)
         {
             try
@@ -562,19 +676,15 @@ namespace CircularEnterpriseApis
 
                 while (DateTime.UtcNow - startTime < timeout)
                 {
-                    // Use async getTransactionByID like Go implementation (search recent blocks 0-10)
                     var data = await GetTransactionByIDAsync(txID, 0, 10);
                     if (data == null)
                     {
-                        // Log non-critical errors and continue polling (matches Go exactly)
                         await Task.Delay(interval);
                         continue;
                     }
 
-                    // Check Go-style response structure: Result == 200
                     if (data.TryGetValue("Result", out var resultObj))
                     {
-                        // Handle both int and JsonElement result types
                         int resultCode = 0;
                         if (resultObj is JsonElement resultElement && resultElement.ValueKind == JsonValueKind.Number)
                         {
@@ -593,12 +703,10 @@ namespace CircularEnterpriseApis
                         {
                             Dictionary<string, object>? responseDict = null;
 
-                            // Handle JsonElement response
                             if (responseObj is JsonElement responseElement)
                             {
                                 responseDict = JsonSerializer.Deserialize<Dictionary<string, object>>(responseElement.GetRawText());
                             }
-                            // Handle already deserialized dictionary
                             else if (responseObj is Dictionary<string, object> directDict)
                             {
                                 responseDict = directDict;
@@ -608,28 +716,24 @@ namespace CircularEnterpriseApis
                             {
                                 string status = "";
 
-                                // Handle JsonElement status
                                 if (statusObj is JsonElement statusElement && statusElement.ValueKind == JsonValueKind.String)
                                 {
                                     status = statusElement.GetString() ?? "";
                                 }
-                                // Handle string status
                                 else if (statusObj is string statusString)
                                 {
                                     status = statusString;
                                 }
 
-                                // If status is not "Pending", transaction is finalized (matches Go exactly)
                                 if (status != "Pending")
                                 {
                                     LastError = null;
-                                    return responseDict; // Transaction finalized
+                                    return responseDict;
                                 }
                             }
                         }
                     }
 
-                    // Wait before next poll - use async delay
                     await Task.Delay(interval);
                 }
 
