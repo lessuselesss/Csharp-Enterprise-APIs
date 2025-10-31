@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using Xunit;
@@ -69,7 +70,7 @@ namespace CircularEnterpriseApis.UnitTests
         }
 
         [Fact]
-        public void CEPAccount_NewCEPAccount_FactoryMethod()
+        public async Task CEPAccount_NewCEPAccount_FactoryMethod()
         {
             // Go reference: account := circular_enterprise_apis.NewCEPAccount()
             var account = new CEPAccount();
@@ -82,7 +83,7 @@ namespace CircularEnterpriseApis.UnitTests
         }
 
         [Fact]
-        public void CEPAccount_Open_ValidatesAddress()
+        public async Task CEPAccount_Open_ValidatesAddress()
         {
             // Go reference: account.Open("") -> false, sets LastError
             var account = new CEPAccount();
@@ -93,7 +94,7 @@ namespace CircularEnterpriseApis.UnitTests
         }
 
         [Fact]
-        public void CEPAccount_Close_ClearsAllData()
+        public async Task CEPAccount_Close_ClearsAllData()
         {
             // Go reference: account.Close() clears all fields
             var account = new CEPAccount();
@@ -179,15 +180,15 @@ namespace CircularEnterpriseApis.UnitTests
         [InlineData("testnet")]
         [InlineData("mainnet")]
         [InlineData("devnet")]
-        public void CEPAccount_SetNetwork_HandlesValidNetworks(string network)
+        public async Task CEPAccount_SetNetwork_HandlesValidNetworks(string network)
         {
-            // Go reference: account.SetNetwork("testnet") sets NetworkNode
+            // Go reference: await account.SetNetworkAsync("testnet") sets NetworkNode
             var account = new CEPAccount();
 
             string initialNAGURL = account.NAGURL;
 
             // Network calls succeed in this environment
-            string result = account.SetNetwork(network);
+            string result = await account.SetNetworkAsync(network);
 
             // On success: returns NAG URL, clears LastError, sets NetworkNode
             Assert.NotEqual("", result);
@@ -198,18 +199,18 @@ namespace CircularEnterpriseApis.UnitTests
         }
 
         [Fact]
-        public void CEPAccount_GetTransaction_ValidatesParameters()
+        public async Task CEPAccount_GetTransaction_ValidatesParameters()
         {
-            // Go reference: account.GetTransaction("", "txid") -> error
+            // Go reference: await account.GetTransactionAsync("", "txid") -> error
             var account = new CEPAccount();
 
-            var result = account.GetTransaction("", "txid");
+            var result = await account.GetTransactionAsync("", "txid");
             Assert.Null(result);
             Assert.Equal("blockID cannot be empty", account.LastError);
 
             // Reset and test transaction ID validation
             account.LastError = "";
-            result = account.GetTransaction("123", "");
+            result = await account.GetTransactionAsync("123", "");
             Assert.Null(result);
             Assert.Equal("transactionID cannot be empty", account.LastError);
         }
@@ -225,7 +226,7 @@ namespace CircularEnterpriseApis.UnitTests
         }
 
         [Fact]
-        public void ErrorHandling_MatchesGoSemantics()
+        public async Task ErrorHandling_MatchesGoSemantics()
         {
             // Go returns errors explicitly, C# should set LastError consistently
             var account = new CEPAccount();
@@ -233,7 +234,7 @@ namespace CircularEnterpriseApis.UnitTests
             // Test empty network (should set LastError)
             try
             {
-                Common.GetNAG("");
+                await CircularEnterpriseApis.GetNAGAsync("");
                 Assert.True(false, "Should have thrown exception");
             }
             catch (InvalidOperationException ex)

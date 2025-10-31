@@ -1,0 +1,4 @@
+CIRCULAR_PRIVATE_KEY='1b2a6773679e7a272ae1c30f2c546161b8f148822924f95740679b255f46bc2c' 
+CIRCULAR_SEED_PHRASE='trash mask kitten cereal diamond moment empower black grant best happy nominee'
+CIRCULAR_ADDRESS='0x15aee057b7beaddf660c15acca0505cccf228afe126c5e4ac6d7ee75bb4b7d0d'
+CIRCULAR_CHAIN_ADDRESS='0x8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2' # Sandbox

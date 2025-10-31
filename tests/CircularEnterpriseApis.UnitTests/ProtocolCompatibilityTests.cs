@@ -3,6 +3,7 @@ using FluentAssertions;
 using CircularEnterpriseApis;
 using System.Text.Json;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace CircularEnterpriseApis.UnitTests
 {
@@ -16,7 +17,7 @@ namespace CircularEnterpriseApis.UnitTests
         private const string TestAddress = "0x1234567890abcdef1234567890abcdef12345678";
 
         [Fact]
-        public void SubmitCertificate_PayloadConstruction_CreatesCorrectJSONWrapper()
+        public async Task SubmitCertificate_PayloadConstruction_CreatesCorrectJSONWrapper()
         {
             // Arrange
             var account = new CEPAccount();
@@ -27,7 +28,7 @@ namespace CircularEnterpriseApis.UnitTests
 
             // Act - We'll need to capture the payload creation indirectly
             // by checking the internal state after SubmitCertificate
-            account.SubmitCertificate(testData, TestPrivateKey);
+            await account.SubmitCertificateAsync(testData, TestPrivateKey);
 
             // Assert - The method should complete without error
             // The key test is that the payload is constructed with Action/Data wrapper
@@ -39,7 +40,7 @@ namespace CircularEnterpriseApis.UnitTests
         }
 
         [Fact]
-        public void SubmitCertificate_TransactionIDFormat_DoesNotInclude0xPrefix()
+        public async Task SubmitCertificate_TransactionIDFormat_DoesNotInclude0xPrefix()
         {
             // Arrange
             var account = new CEPAccount();
@@ -47,7 +48,7 @@ namespace CircularEnterpriseApis.UnitTests
             account.Nonce = 1;
 
             // Act
-            account.SubmitCertificate("test data", TestPrivateKey);
+            await account.SubmitCertificateAsync("test data", TestPrivateKey);
 
             // Assert - Transaction ID should NOT start with "0x"
             account.LatestTxID.Should().NotStartWith("0x");

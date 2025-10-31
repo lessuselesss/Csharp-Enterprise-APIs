@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Xunit;
 using FluentAssertions;
 using CircularEnterpriseApis;
@@ -19,19 +20,19 @@ namespace CircularEnterpriseApis.UnitTests
             account.Address.Should().Be("");
             account.PublicKey.Should().Be("");
             account.Info.Should().BeNull();
-            account.CodeVersion.Should().Be(Common.LibVersion);
+            account.CodeVersion.Should().Be(Constants.LibVersion);
             account.LastError.Should().Be("");
-            account.NAGURL.Should().Be(Common.DefaultNAG);
+            account.NAGURL.Should().Be(Constants.DefaultNAG);
             account.NetworkNode.Should().Be("");
-            account.Blockchain.Should().Be(Common.DefaultChain);
+            account.Blockchain.Should().Be(Constants.DefaultChain);
             account.LatestTxID.Should().Be("");
             account.Nonce.Should().Be(0);
             account.IntervalSec.Should().Be(5);
-            account.NetworkURL.Should().Be(Common.NetworkURL);
+            account.NetworkURL.Should().Be(Constants.NetworkURL);
         }
 
         [Fact]
-        public void Open_ValidAddress_ReturnsTrue()
+        public async Task Open_ValidAddress_ReturnsTrue()
         {
             var account = new CEPAccount();
             string testAddress = "0x1234567890abcdef";
@@ -44,7 +45,7 @@ namespace CircularEnterpriseApis.UnitTests
         }
 
         [Fact]
-        public void Open_EmptyAddress_ReturnsFalse()
+        public async Task Open_EmptyAddress_ReturnsFalse()
         {
             var account = new CEPAccount();
 
@@ -55,7 +56,7 @@ namespace CircularEnterpriseApis.UnitTests
         }
 
         [Fact]
-        public void Close_ClearsAllData()
+        public async Task Close_ClearsAllData()
         {
             var account = new CEPAccount();
             account.Open("0x1234567890abcdef");
@@ -75,11 +76,11 @@ namespace CircularEnterpriseApis.UnitTests
         }
 
         [Fact]
-        public void SetNetwork_ValidNetwork_ReturnsNAGURL()
+        public async Task SetNetwork_ValidNetwork_ReturnsNAGURL()
         {
             var account = new CEPAccount();
 
-            string result = account.SetNetwork("testnet");
+            string result = await account.SetNetworkAsync("testnet");
 
             // Should return some URL (actual network call may fail in test, but method should handle it)
             result.Should().NotBeNull();
@@ -89,11 +90,11 @@ namespace CircularEnterpriseApis.UnitTests
         }
 
         [Fact]
-        public void SetNetwork_EmptyNetwork_SetsError()
+        public async Task SetNetwork_EmptyNetwork_SetsError()
         {
             var account = new CEPAccount();
 
-            string result = account.SetNetwork("");
+            string result = await account.SetNetworkAsync("");
 
             result.Should().Be("");
             account.LastError.Should().Contain("network identifier cannot be empty");
@@ -133,34 +134,34 @@ namespace CircularEnterpriseApis.UnitTests
         }
 
         [Fact]
-        public void UpdateAccount_NoAddress_ReturnsFalse()
+        public async Task UpdateAccount_NoAddress_ReturnsFalse()
         {
             var account = new CEPAccount();
 
-            bool result = account.UpdateAccount();
+            bool result = await account.UpdateAccountAsync();
 
             result.Should().BeFalse();
             account.LastError.Should().Be("Account not open"); // Exact Go error message
         }
 
         [Fact]
-        public void SubmitCertificate_EmptyData_SetsError()
+        public async Task SubmitCertificate_EmptyData_SetsError()
         {
             var account = new CEPAccount();
             account.Open("0x1234567890abcdef");
 
-            account.SubmitCertificate("", "privatekey123");
+            await account.SubmitCertificateAsync("", "privatekey123");
 
             account.LastError.Should().Contain("Certificate data cannot be empty");
         }
 
         [Fact]
-        public void SubmitCertificate_EmptyPrivateKey_SetsError()
+        public async Task SubmitCertificate_EmptyPrivateKey_SetsError()
         {
             var account = new CEPAccount();
             account.Open("0x1234567890abcdef");
 
-            account.SubmitCertificate("test data", "");
+            await account.SubmitCertificateAsync("test data", "");
 
             account.LastError.Should().Contain("Private key cannot be empty");
         }
@@ -199,22 +200,22 @@ namespace CircularEnterpriseApis.UnitTests
         }
 
         [Fact]
-        public void GetTransaction_NullParameters_ReturnsNull()
+        public async Task GetTransaction_NullParameters_ReturnsNull()
         {
             var account = new CEPAccount();
 
-            var result = account.GetTransaction("", "");
+            var result = await account.GetTransactionAsync("", "");
 
             result.Should().BeNull();
             account.LastError.Should().NotBeEmpty();
         }
 
         [Fact]
-        public void GetTransactionOutcome_EmptyTxID_ReturnsNull()
+        public async Task GetTransactionOutcome_EmptyTxID_ReturnsNull()
         {
             var account = new CEPAccount();
 
-            var result = account.GetTransactionOutcome("", 30, 5);
+            var result = await account.GetTransactionOutcomeAsync("", 30, 5);
 
             result.Should().BeNull();
             account.LastError.Should().NotBeEmpty();

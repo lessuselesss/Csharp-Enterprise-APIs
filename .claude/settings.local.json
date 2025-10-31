@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git merge --no-ff feature/phase3-deprecation-warnings-v1.2.0 -m \"$(cat <<''EOF''\nMerge Phase 3: Deprecation warnings for sync methods (v1.2.0)\n\nMerges feature/phase3-deprecation-warnings-v1.2.0 into main\n\nThis release adds deprecation warnings to all synchronous methods,\nguiding users toward async alternatives in preparation for v2.0.0.\n\nKey Changes:\n- [Obsolete] attributes on 8 synchronous methods\n- Comprehensive MIGRATION.md guide (500+ lines)\n- 5 migration patterns with before/after examples\n- Troubleshooting section and best practices\n- Complete method mapping table\n\nTesting: Build succeeds with 0 warnings, 0 errors\nImpact: Backward-compatible - no breaking changes\nReady for: v1.2.0 release\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git merge:*)",
+      "Bash(export CIRCULAR_PRIVATE_KEY=0x1b2a6773679e7a272ae1c30f2c546161b8f148822924f95740679b255f46bc2c)",
+      "Bash(export CIRCULAR_ADDRESS=0x15aee057b7beaddf660c15acca0505cccf228afe126c5e4ac6d7ee75bb4b7d0d)",
+      "Bash(find:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

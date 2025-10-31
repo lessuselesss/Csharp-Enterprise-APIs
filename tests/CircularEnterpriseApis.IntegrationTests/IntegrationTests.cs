@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Xunit;
 using FluentAssertions;
 using CircularEnterpriseApis;
@@ -29,7 +30,7 @@ namespace CircularEnterpriseApis.IntegrationTests
         /// Tests basic circular operations - matches Go TestCircularOperations
         /// </summary>
         [Fact]
-        public void TestCircularOperations()
+        public async Task TestCircularOperations()
         {
             if (string.IsNullOrEmpty(privateKeyHex) || string.IsNullOrEmpty(address))
             {
@@ -44,8 +45,8 @@ namespace CircularEnterpriseApis.IntegrationTests
             opened.Should().BeTrue($"acc.Open() failed: {acc.LastError}");
 
             // Set network to testnet like Go test
-            string nagUrl = acc.SetNetwork("testnet");
-            nagUrl.Should().NotBeEmpty($"acc.SetNetwork() failed: {acc.LastError}");
+            string nagUrl = await acc.SetNetworkAsync("testnet");
+            nagUrl.Should().NotBeEmpty($"await acc.SetNetworkAsync() failed: {acc.LastError}");
 
             // Set default blockchain like Go test
             acc.SetBlockchain("8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2");
@@ -55,7 +56,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             Console.WriteLine($"Blockchain: {acc.Blockchain}");
 
             // Update account - proceed even if it fails like the example does
-            bool updated = acc.UpdateAccount();
+            bool updated = await acc.UpdateAccountAsync();
             if (!updated)
             {
                 Console.WriteLine($"Account update failed: {acc.LastError}, proceeding anyway...");
@@ -66,7 +67,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             }
 
             // Submit certificate with test message
-            acc.SubmitCertificate("test message", privateKeyHex);
+            await acc.SubmitCertificateAsync("test message", privateKeyHex);
 
             // Log submission result like the example does
             if (!string.IsNullOrEmpty(acc.LastError))
@@ -83,7 +84,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             txHash.Should().NotBeEmpty("txHash not found in response");
 
             // Poll for transaction outcome with 30 second timeout
-            var outcome = acc.GetTransactionOutcome(txHash, 30, 5);
+            var outcome = await acc.GetTransactionOutcomeAsync(txHash, 30, 5);
 
             if (outcome != null)
             {
@@ -101,7 +102,7 @@ namespace CircularEnterpriseApis.IntegrationTests
         /// Tests certificate operations - matches Go TestCertificateOperations
         /// </summary>
         [Fact]
-        public void TestCertificateOperations()
+        public async Task TestCertificateOperations()
         {
             if (string.IsNullOrEmpty(privateKeyHex) || string.IsNullOrEmpty(address))
             {
@@ -109,7 +110,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             }
 
             var acc = new CEPAccount();
-            acc.SetNetwork("testnet");
+            await acc.SetNetworkAsync("testnet");
             acc.SetBlockchain("8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2");
 
             bool opened = acc.Open(address);
@@ -118,19 +119,19 @@ namespace CircularEnterpriseApis.IntegrationTests
             Console.WriteLine($"NAGURL: {acc.NAGURL}");
             Console.WriteLine($"Blockchain: {acc.Blockchain}");
 
-            bool updated = acc.UpdateAccount();
-            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.LastError}");
+            bool updated = await acc.UpdateAccountAsync();
+            updated.Should().BeTrue($"await acc.UpdateAccountAsync() failed: {acc.LastError}");
 
             // Submit certificate with test data
             string certificateData = "test data";
-            acc.SubmitCertificate(certificateData, privateKeyHex);
-            acc.LastError.Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.LastError}");
+            await acc.SubmitCertificateAsync(certificateData, privateKeyHex);
+            acc.LastError.Should().BeEmpty($"await acc.SubmitCertificateAsync() failed: {acc.LastError}");
 
             string txHash = acc.LatestTxID;
             txHash.Should().NotBeEmpty("txHash not found in response");
 
             // Poll for transaction outcome
-            var outcome = acc.GetTransactionOutcome(txHash, 30, 5);
+            var outcome = await acc.GetTransactionOutcomeAsync(txHash, 30, 5);
 
             if (outcome != null)
             {
@@ -148,7 +149,7 @@ namespace CircularEnterpriseApis.IntegrationTests
         /// Tests Hello World certification - matches Go TestHelloWorldCertification
         /// </summary>
         [Fact]
-        public void TestHelloWorldCertification()
+        public async Task TestHelloWorldCertification()
         {
             if (string.IsNullOrEmpty(privateKeyHex) || string.IsNullOrEmpty(address))
             {
@@ -156,7 +157,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             }
 
             var acc = new CEPAccount();
-            acc.SetNetwork("testnet");
+            await acc.SetNetworkAsync("testnet");
             acc.SetBlockchain("8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2");
 
             bool opened = acc.Open(address);
@@ -165,16 +166,16 @@ namespace CircularEnterpriseApis.IntegrationTests
             Console.WriteLine($"NAGURL: {acc.NAGURL}");
             Console.WriteLine($"Blockchain: {acc.Blockchain}");
 
-            bool updated = acc.UpdateAccount();
-            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.LastError}");
+            bool updated = await acc.UpdateAccountAsync();
+            updated.Should().BeTrue($"await acc.UpdateAccountAsync() failed: {acc.LastError}");
 
             // Create certificate with timestamp like Go test
             string message = "Hello World";
             long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             string certificateData = $"{{\"message\":\"{message}\",\"timestamp\":{timestamp}}}";
 
-            acc.SubmitCertificate(certificateData, privateKeyHex);
-            acc.LastError.Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.LastError}");
+            await acc.SubmitCertificateAsync(certificateData, privateKeyHex);
+            acc.LastError.Should().BeEmpty($"await acc.SubmitCertificateAsync() failed: {acc.LastError}");
 
             string txHash = acc.LatestTxID;
             txHash.Should().NotBeEmpty("txHash not found in response");
@@ -182,7 +183,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             Console.WriteLine($"Hello World certificate submitted with TX ID: {txHash}");
 
             // Poll for transaction outcome
-            var outcome = acc.GetTransactionOutcome(txHash, 30, 5);
+            var outcome = await acc.GetTransactionOutcomeAsync(txHash, 30, 5);
 
             if (outcome != null)
             {
@@ -204,7 +205,7 @@ namespace CircularEnterpriseApis.IntegrationTests
         /// Tests JSON certificate operations
         /// </summary>
         [Fact]
-        public void TestJSONCertificateOperations()
+        public async Task TestJSONCertificateOperations()
         {
             if (string.IsNullOrEmpty(privateKeyHex) || string.IsNullOrEmpty(address))
             {
@@ -212,18 +213,18 @@ namespace CircularEnterpriseApis.IntegrationTests
             }
 
             var acc = new CEPAccount();
-            acc.SetNetwork("testnet");
+            await acc.SetNetworkAsync("testnet");
             acc.SetBlockchain("8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2");
 
             bool opened = acc.Open(address);
             opened.Should().BeTrue($"acc.Open() failed: {acc.LastError}");
 
-            bool updated = acc.UpdateAccount();
-            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.LastError}");
+            bool updated = await acc.UpdateAccountAsync();
+            updated.Should().BeTrue($"await acc.UpdateAccountAsync() failed: {acc.LastError}");
 
             // Submit certificate with JSON data like Go E2E test
-            acc.SubmitCertificate("{\"test\":\"data\"}", privateKeyHex);
-            acc.LastError.Should().BeEmpty($"acc.SubmitCertificate() failed: {acc.LastError}");
+            await acc.SubmitCertificateAsync("{\"test\":\"data\"}", privateKeyHex);
+            acc.LastError.Should().BeEmpty($"await acc.SubmitCertificateAsync() failed: {acc.LastError}");
 
             string txHash = acc.LatestTxID;
             txHash.Should().NotBeEmpty("txHash not found in response");
@@ -231,7 +232,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             Console.WriteLine($"JSON certificate submitted with TX ID: {txHash}");
 
             // Poll for transaction outcome
-            var outcome = acc.GetTransactionOutcome(txHash, 30, 5);
+            var outcome = await acc.GetTransactionOutcomeAsync(txHash, 30, 5);
 
             if (outcome != null)
             {
@@ -249,7 +250,7 @@ namespace CircularEnterpriseApis.IntegrationTests
         /// Tests certificate chain operations - submitting multiple linked certificates
         /// </summary>
         [Fact]
-        public void TestCertificateChainOperations()
+        public async Task TestCertificateChainOperations()
         {
             if (string.IsNullOrEmpty(privateKeyHex) || string.IsNullOrEmpty(address))
             {
@@ -257,14 +258,14 @@ namespace CircularEnterpriseApis.IntegrationTests
             }
 
             var acc = new CEPAccount();
-            acc.SetNetwork("testnet");
+            await acc.SetNetworkAsync("testnet");
             acc.SetBlockchain("8a20baa40c45dc5055aeb26197c203e576ef389d9acb171bd62da11dc5ad72b2");
 
             bool opened = acc.Open(address);
             opened.Should().BeTrue($"acc.Open() failed: {acc.LastError}");
 
-            bool updated = acc.UpdateAccount();
-            updated.Should().BeTrue($"acc.UpdateAccount() failed: {acc.LastError}");
+            bool updated = await acc.UpdateAccountAsync();
+            updated.Should().BeTrue($"await acc.UpdateAccountAsync() failed: {acc.LastError}");
 
             Console.WriteLine($"Starting certificate chain with nonce: {acc.Nonce}");
 
@@ -285,7 +286,7 @@ namespace CircularEnterpriseApis.IntegrationTests
                 string certJson = cert.GetJSONCertificate();
                 Console.WriteLine($"Submitting certificate {i + 1}: {certJson}");
 
-                acc.SubmitCertificate(certJson, privateKeyHex);
+                await acc.SubmitCertificateAsync(certJson, privateKeyHex);
                 acc.LastError.Should().BeEmpty($"Certificate {i + 1} submission failed: {acc.LastError}");
 
                 txHashes[i] = acc.LatestTxID;
@@ -304,7 +305,7 @@ namespace CircularEnterpriseApis.IntegrationTests
             Console.WriteLine($"Transaction chain: {string.Join(" -> ", txHashes)}");
 
             // Verify the last transaction
-            var outcome = acc.GetTransactionOutcome(txHashes[2], 30, 5);
+            var outcome = await acc.GetTransactionOutcomeAsync(txHashes[2], 30, 5);
             if (outcome != null)
             {
                 Console.WriteLine($"Final certificate confirmed: {System.Text.Json.JsonSerializer.Serialize(outcome)}");

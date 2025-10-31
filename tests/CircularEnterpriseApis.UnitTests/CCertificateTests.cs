@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Xunit;
 using FluentAssertions;
 using CircularEnterpriseApis;
@@ -20,7 +21,7 @@ namespace CircularEnterpriseApis.UnitTests
             cert.Data.Should().Be("");
             cert.PreviousTxID.Should().Be("");
             cert.PreviousBlock.Should().Be("");
-            cert.Version.Should().Be(Common.LibVersion);
+            cert.Version.Should().Be(Constants.LibVersion);
         }
 
         [Fact]
@@ -84,7 +85,7 @@ namespace CircularEnterpriseApis.UnitTests
             json.Should().Contain("\"data\":"); // lowercase 'data' like Go
             json.Should().Contain("\"previousTxID\":\"tx123\"");
             json.Should().Contain("\"previousBlock\":\"block456\"");
-            json.Should().Contain($"\"version\":\"{Common.LibVersion}\""); // lowercase 'version' like Go
+            json.Should().Contain($"\"version\":\"{Constants.LibVersion}\""); // lowercase 'version' like Go
         }
 
         [Fact]
