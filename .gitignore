@@ -354,3 +354,7 @@ FodyWeavers.xsd
 
 # Repomix generated files
 *repomix.xml
+nodejs.xml
+
+# Claude Code local settings
+.claude/settings.local.json
