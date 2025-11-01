@@ -169,15 +169,6 @@ namespace CircularEnterpriseApis
         }
 
         /// <summary>
-        /// Retrieves the last error message if any operation failed.
-        /// </summary>
-        /// <returns>The error message string, or null if no error occurred</returns>
-        public string? GetLastError()
-        {
-            return string.IsNullOrEmpty(LastError) ? null : LastError;
-        }
-
-        /// <summary>
         /// Sets the blockchain identifier for transactions.
         /// Use this to target a specific blockchain network.
         /// </summary>
@@ -188,13 +179,21 @@ namespace CircularEnterpriseApis
         }
 
         /// <summary>
-        /// Signs data using the provided private key (internal use only).
-        /// This method is used internally by SubmitCertificateAsync and should not be called directly.
+        /// Signs data using the provided private key.
+        /// This method can be used to sign arbitrary data with your private key.
         /// </summary>
         /// <param name="data">Data to sign</param>
         /// <param name="privateKeyHex">Private key in hex format</param>
         /// <returns>Signature in hex format, or empty string on error</returns>
-        internal string SignData(string data, string privateKeyHex)
+        /// <example>
+        /// <code>
+        /// var account = new CEPAccount();
+        /// account.Open("your-wallet-address");
+        /// string signature = account.SignData("Hello World", "your-private-key");
+        /// Console.WriteLine($"Signature: {signature}");
+        /// </code>
+        /// </example>
+        public string SignData(string data, string privateKeyHex)
         {
             try
             {
