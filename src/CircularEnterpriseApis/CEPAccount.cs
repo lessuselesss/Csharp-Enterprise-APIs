@@ -570,9 +570,25 @@ namespace CircularEnterpriseApis
         }
 
         /// <summary>
-        /// Internal method to retrieve transaction by ID within a block range.
+        /// Retrieves a transaction by ID within a block range.
+        /// This method allows searching for a transaction across multiple blocks when the exact block is unknown.
         /// </summary>
-        private async Task<Dictionary<string, object>?> GetTransactionByIDAsync(string transactionID, long startBlock, long endBlock)
+        /// <param name="transactionID">The transaction ID (hash) to search for</param>
+        /// <param name="startBlock">Starting block number. If endBlock is 0, this indicates the number of blocks from the latest</param>
+        /// <param name="endBlock">Ending block number. If 0, search from latest blocks backwards</param>
+        /// <returns>
+        /// A dictionary containing transaction details on success, or null on failure (check <see cref="LastError"/>).
+        /// </returns>
+        /// <example>
+        /// <code>
+        /// // Search in last 10 blocks from the latest block
+        /// var tx = await account.GetTransactionByIDAsync(txID, 0, 10);
+        ///
+        /// // Search in specific block range (blocks 100 to 200)
+        /// var tx = await account.GetTransactionByIDAsync(txID, 100, 200);
+        /// </code>
+        /// </example>
+        public async Task<Dictionary<string, object>?> GetTransactionByIDAsync(string transactionID, long startBlock, long endBlock)
         {
             try
             {
